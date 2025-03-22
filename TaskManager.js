@@ -552,6 +552,7 @@ class UrlFunction {
             const MATCHED_ITEMS = configured_item.match(/^(.+)(?:\.github\.io|\.html)?\/?$/);
             if (MATCHED_ITEMS) {
                 const HTML_TITLE = MATCHED_ITEMS[1];
+                HTML_TITLE.replace(".html", "");
                 return HTML_TITLE;
             }
             else {
