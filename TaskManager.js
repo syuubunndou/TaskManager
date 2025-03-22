@@ -551,10 +551,10 @@ class UrlFunction {
         if (configured_item) {
             const MATCHED_ITEMS = configured_item.match(/^(.+)(?:\.github\.io|\.html)?\/?$/);
             if (MATCHED_ITEMS) {
-                const HTML_TITLE = MATCHED_ITEMS[1];
-                HTML_TITLE.replace(".html", "");
-                console.log(`hey it is : ${HTML_TITLE}`);
-                return HTML_TITLE;
+                var htmlTitle = MATCHED_ITEMS[1];
+                htmlTitle = htmlTitle.replace(".html", "");
+                console.log(`hey it is : ${htmlTitle}`);
+                return htmlTitle;
             }
             else {
                 alert(`Error: Utils.js, UrlFunction, extractHtmlTitle, 正規表現に一致しませんでした。htmlLink is ${htmlLink}, Reg is ^(.+)(?:\.github\.io|\.html)?\/?$`);
