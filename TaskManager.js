@@ -3389,7 +3389,6 @@ class TaskManager {
         this.PreloaderFunc = new PreLoader();
         this.WINDOWS = [];
         this.AlertSettingWindow = new AlertSettingWindow();
-        console.log("in taskmanager bef execute by url");
         this.executeByURL();
     }
     ;
@@ -3400,10 +3399,9 @@ class TaskManager {
             const LABO_LOGO = document.getElementById("headerLaboLogo");
             const URL = window.location.href;
             const PAGE_TITLE = this.UrlFunc.extractHtmlTitle(URL);
-            console.log(PAGE_TITLE);
             if (PAGE_TITLE) {
                 this.setHeaderEvents(PAGE_TITLE);
-                if (PAGE_TITLE === "index") {
+                if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager") {
                     yield this.renderTaskWindows();
                 }
                 else if (PAGE_TITLE === "add-task" || PAGE_TITLE === "edit-task") {
@@ -3442,7 +3440,7 @@ class TaskManager {
         });
     }
     setHeaderEvents(PAGE_TITLE) {
-        if (PAGE_TITLE === "index") {
+        if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager") {
             const ADD_BTN = document.getElementById("headerAddBtn");
             ADD_BTN.addEventListener("click", () => {
                 this.UrlFunc.redirect({
@@ -3461,7 +3459,7 @@ class TaskManager {
                 });
             });
         }
-        if (PAGE_TITLE === "index" || PAGE_TITLE === "add-task") {
+        if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager" || PAGE_TITLE === "add-task") {
             this.__setMenuEvents();
             const LABO_LOGO = document.getElementById("headerLaboLogo");
             LABO_LOGO.addEventListener("click", () => {
