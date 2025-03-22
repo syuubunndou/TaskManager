@@ -3421,6 +3421,9 @@ class TaskManager {
                         this.setEditTaskEvent();
                     }
                 }
+                else {
+                    alert(`無効なページタイトルです。: Pagetitle = ${PAGE_TITLE}`);
+                }
                 this.PreloaderFunc.closePreLoader();
                 this.AnimateFunc.fadeIn(LABO_LOGO);
             }
