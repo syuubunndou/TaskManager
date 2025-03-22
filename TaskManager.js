@@ -549,13 +549,13 @@ class UrlFunction {
         htmlLink = htmlLink.replace(/\/$/, "");
         var configured_item = htmlLink.split("/").pop();
         if (configured_item) {
-            const MATCHED_ITEMS = configured_item.match(/^(.+)(?:\.github\.io|\.html)/);
+            const MATCHED_ITEMS = configured_item.match(/^(.+)(?:\.github\.io|\.html)?\/?$/);
             if (MATCHED_ITEMS) {
                 const HTML_TITLE = MATCHED_ITEMS[1];
                 return HTML_TITLE;
             }
             else {
-                alert(`Error: Utils.js, UrlFunction, extractHtmlTitle, 正規表現に一致しませんでした。htmlLink is ${htmlLink}, Reg is ^(.+)(?:\.github\.io|\.html)`);
+                alert(`Error: Utils.js, UrlFunction, extractHtmlTitle, 正規表現に一致しませんでした。htmlLink is ${htmlLink}, Reg is ^(.+)(?:\.github\.io|\.html)?\/?$`);
             }
         }
         else {
