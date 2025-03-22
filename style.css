@@ -119,6 +119,36 @@ html, body {
     
 }
 
+.promptLogin{
+    position        : relative;
+    top             : 10%;
+    left            : 10%;
+
+    width           : 80%;
+
+    font-size       : 40px;
+
+    display         : none;
+
+    background-color: snow;
+    border-top      : 5px solid #000000; /* 青色の枠線 */
+    border-left     : 5px solid #000000; /* 青色の枠線 */
+    border-right    : 5px solid #000000; /* 青色の枠線 */
+    border-bottom   : 5px solid #000000;
+    box-shadow      : 2px 2px 5px rgba(0, 0, 0, 0.2); /* 影を追加 */
+    border-radius   : 5px; /* 角を丸くする */  
+}
+.promptLogin__haguruma{
+    position        : relative;
+    top             : 15px;
+    width           : 60px;
+}
+.promptLogin__login-exp{
+    position        : relative;
+    top             : 5px;
+    width           : 120px;   
+}
+
 /*=================================================================================*/
 /*==[index.htmlのタスクウィンドウ部分]===============================================================================*/
 
