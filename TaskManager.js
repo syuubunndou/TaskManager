@@ -4033,8 +4033,5 @@ class TaskManager {
         });
     }
 }
-const RESULT = new UrlFunction().extractHtmlTitle("https://syuubunndou.github.io/TaskManager/?fbclid=PAZXh0bgNhZW0CMTEAAaZ3ay4IW32HYa-B4kCNf7Z8_876q9clzew1V3RI0S_625TuatR_d-1Qxps_aem_dqmvmxdzJJd1GUCfOmYXKA");
-console.log(RESULT);
-const ANOTHER_RESULT = new UrlFunction().extractHtmlTitle("http://127.0.0.1:5500/TaskManager%20@web/index.html");
-console.log(ANOTHER_RESULT);
+const APP = new TaskManager();
 //# sourceMappingURL=TaskManager.js.map
