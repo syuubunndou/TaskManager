@@ -632,12 +632,12 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
     const PAGE_TITLE_REG_WITH_SYNBOLE = /\/([a-zA-Z_\-.・\(\)\[\]\{},@]*)\.html$/;
     URL = this.__deleteQueryPart(URL);
     if (URL.match(/github/)) {
-        const MATCHED_ITEMS = URL.match(/https:\/{2}yamatoaita.github.io\/[/w/.]*/);
+        const MATCHED_ITEMS = URL.match(/https:\/{2}syuubunndou.github.io\/[/w/.]*/);
         if (MATCHED_ITEMS) {
             const FUNDATIONAL_URL = MATCHED_ITEMS[0];
             const FUNDATIONAL_PAGE_NAME = this.extractHtmlTitle(FUNDATIONAL_URL);
             if (FUNDATIONAL_PAGE_NAME == PAGE_TITLE) {
-                alert("ホームページ名とPAGE_TITLEは違う名前でなければなりません。\n〇　https://yamatoaita.github.io/ホームページ名.github.io/サブページ名.html");
+                alert("ホームページ名とPAGE_TITLEは違う名前でなければなりません。\n〇　https://syuubunndou.github.io/ホームページ名.github.io/サブページ名.html");
             }
             else {
                 if (URL.match(/\.html$/)) {
@@ -658,7 +658,7 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
         }
         else {
             alert(`Error: Utils.js, UrlFunctions, composedURLbyPageTitle, 正規表現にマッチしたものはありません。URL is ${URL}`);
-            console.log(`URL is ${URL}, 正規表現: https:\/{2}yamatoaita.github.io\/[/w/.]*`);
+            console.log(`URL is ${URL}, 正規表現: https:\/{2}syuubunndou.github.io\/[/w/.]*`);
             return;
         }
     }
@@ -675,7 +675,7 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
 }, _UrlFunction___returnHomePageURL = function _UrlFunction___returnHomePageURL(homePageTitle = "index") {
     const URL = this.__deleteQueryPart(window.location.href);
     if (URL.match(/github/)) {
-        const MATCHED_ITEMS = URL.match(/https:\/{2}yamatoaita.github.io\/[\w\.]*\//);
+        const MATCHED_ITEMS = URL.match(/https:\/{2}syuubunndou.github.io\/[\w\.]*\//);
         if (MATCHED_ITEMS) {
             var gitHomePageURL = MATCHED_ITEMS[0];
             return gitHomePageURL;
