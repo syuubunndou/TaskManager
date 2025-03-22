@@ -3400,6 +3400,7 @@ class TaskManager {
         return __awaiter(this, void 0, void 0, function* () {
             this.PreloaderFunc.charWaterflow();
             yield this.__renderLoginStatus();
+            this.__showSignifierPromptLogin();
             const LABO_LOGO = document.getElementById("headerLaboLogo");
             const URL = window.location.href;
             const PAGE_TITLE = this.UrlFunc.extractHtmlTitle(URL);
@@ -3442,6 +3443,31 @@ class TaskManager {
             const LOGIN_BTN = document.getElementById("menuBtnLogin");
             yield this.FirebaseApp.renderAuthStatus(LOGIN_BTN, SPAN_NAME);
         });
+    }
+    __showSignifierPromptLogin() {
+        const SPAN_NAME = document.getElementById("headerUserName");
+        console.log(SPAN_NAME.textContent);
+        if (SPAN_NAME.textContent) {
+        }
+        else {
+            const PROMPT_LOGIN = document.getElementById("promptLogin");
+            PROMPT_LOGIN.style.display = "block";
+            const HAGURUMA = document.getElementById("haguruma");
+            HAGURUMA.addEventListener("click", () => {
+                const MENU = document.getElementById("menu");
+                HAGURUMA.addEventListener("click", () => {
+                    MENU.style.display = "inline";
+                });
+                HAGURUMA.addEventListener("mouseenter", () => {
+                    MENU.style.display = "inline";
+                });
+                HAGURUMA.addEventListener("mouseleave", () => {
+                    MENU.style.display = "none";
+                });
+            });
+            const ADD_BTN = document.getElementById("headerAddBtn");
+            ADD_BTN.style.visibility = "hidden";
+        }
     }
     setHeaderEvents(PAGE_TITLE) {
         if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager") {
