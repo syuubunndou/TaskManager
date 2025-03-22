@@ -3389,6 +3389,7 @@ class TaskManager {
         this.PreloaderFunc = new PreLoader();
         this.WINDOWS = [];
         this.AlertSettingWindow = new AlertSettingWindow();
+        console.log("in taskmanager bef execute by url");
         this.executeByURL();
     }
     ;
@@ -3399,6 +3400,7 @@ class TaskManager {
             const LABO_LOGO = document.getElementById("headerLaboLogo");
             const URL = window.location.href;
             const PAGE_TITLE = this.UrlFunc.extractHtmlTitle(URL);
+            console.log(PAGE_TITLE);
             if (PAGE_TITLE) {
                 this.setHeaderEvents(PAGE_TITLE);
                 if (PAGE_TITLE === "index") {
