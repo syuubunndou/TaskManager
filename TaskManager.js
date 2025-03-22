@@ -545,7 +545,9 @@ class UrlFunction {
     constructor() {
         _UrlFunction_instances.add(this);
     }
-    extractHtmlTitle(htmlLink) {
+    extractHtmlTitle(rawHtml) {
+        const url = new URL(rawHtml);
+        let htmlLink = url.pathname;
         htmlLink = htmlLink.replace(/\/$/, "");
         var configured_item = htmlLink.split("/").pop();
         if (configured_item) {
@@ -4031,5 +4033,8 @@ class TaskManager {
         });
     }
 }
-const APP = new TaskManager();
+const RESULT = new UrlFunction().extractHtmlTitle("https://syuubunndou.github.io/TaskManager/?fbclid=PAZXh0bgNhZW0CMTEAAaZ3ay4IW32HYa-B4kCNf7Z8_876q9clzew1V3RI0S_625TuatR_d-1Qxps_aem_dqmvmxdzJJd1GUCfOmYXKA");
+console.log(RESULT);
+const ANOTHER_RESULT = new UrlFunction().extractHtmlTitle("http://127.0.0.1:5500/TaskManager%20@web/index.html");
+console.log(ANOTHER_RESULT);
 //# sourceMappingURL=TaskManager.js.map
