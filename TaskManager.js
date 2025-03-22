@@ -553,6 +553,7 @@ class UrlFunction {
             if (MATCHED_ITEMS) {
                 const HTML_TITLE = MATCHED_ITEMS[1];
                 HTML_TITLE.replace(".html", "");
+                console.log(`hey it is : ${HTML_TITLE}`);
                 return HTML_TITLE;
             }
             else {
