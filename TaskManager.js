@@ -553,7 +553,7 @@ class UrlFunction {
             if (MATCHED_ITEMS) {
                 var htmlTitle = MATCHED_ITEMS[1];
                 htmlTitle = htmlTitle.replace(".html", "");
-                console.log(`hey it is : ${htmlTitle}`);
+                htmlTitle = htmlTitle.replace(/\?.*$/, "");
                 return htmlTitle;
             }
             else {
