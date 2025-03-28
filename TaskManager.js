@@ -12,26 +12,49 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FirebaseFunctions_instances, _FirebaseFunctions___loginWithGoogle, _FirebaseFunctions___logoutFromGoogle, _FirebaseFunctions___isLogined, _FirebaseFunctions___fetchGoogleAccountData, _FirebaseFunctions___uploadAndResetInfo, _FirebaseFunctions___alertMessage, _FirebaseFunctions___initTipFlg, _FirebaseFunctions___tellTips, _FirebaseFunctions___showCaution, _UrlFunction_instances, _UrlFunction___composeURLbyPageTitle, _UrlFunction___returnHomePageURL, _HtmlFunction_instances, _HtmlFunction___resetPlaceHolder, _HtmlFunction___getRawText, _HtmlFunction___setValueToContentElement, _HtmlFunction___validateLengthWithin, _HtmlFunction___setCursorToEnd, _HtmlFunction___onlyNumbers, _HtmlFunction___onlySelectedNumberRange, _HtmlFunction___withinMonthlyDate, _HtmlFunction___validateMonthlyDate, _HtmlFunction___zeroPadding, _HtmlFunction___renderWeekday, _HtmlFunction___isLaunchEvent, _AlertSettingWindow_instances, _AlertSettingWindow___setCommandBtnsEvent, _AlertSettingWindow___selectUnit, _AlertSettingWindow___deleteUnit, _AlertSettingWindow___renameAlertUnit, _AlertSettingWindow___reassignThisIndex, _AlertSettingWindow___setBasicAlerts, _AlertSettingWindow___setValueToSpecifyAlertUnit, _AlertSettingWindow___setMySettingAlerts, _AlertSettingWindow___declareAndCreateElements, _AlertSettingWindow___setColorSampleEvent, _AlertSettingWindow___setColorSample, _AlertSettingWindow___setFlashEvent, _AlertSettingWindow___hiddenFlashElements, _AlertSettingWindow___showFlashElements, _AlertSettingWindow___flashEvent, _AlertSettingWindow___setValidation, _AlertSettingWindow___resetOutline, _AlertSettingWindow___writeOutline, _AlertSettingWindow___setValue, _AlertSettingWindow___createDictOfColor, _AlertSettingWindow___isFilledContents;
+var _FirebaseFunctions_instances, _FirebaseFunctions___loginWithGoogle, _FirebaseFunctions___logoutFromGoogle, _FirebaseFunctions___isLogined, _FirebaseFunctions___applyByAuthStateChange, _FirebaseFunctions___applyBySignInWithRedirect, _FirebaseFunctions___translateSignErrors, _FirebaseFunctions___fetchGoogleAccountData, _FirebaseFunctions___uploadAndResetInfo, _FirebaseFunctions___alertMessage, _FirebaseFunctions___initTipFlg, _FirebaseFunctions___tellTips, _FirebaseFunctions___showCaution, _UrlFunction_instances, _UrlFunction___composeURLbyPageTitle, _UrlFunction___returnHomePageURL, _HtmlFunction_instances, _HtmlFunction___resetPlaceHolder, _HtmlFunction___getRawText, _HtmlFunction___setValueToContentElement, _HtmlFunction___validateLengthWithin, _HtmlFunction___setCursorToEnd, _HtmlFunction___onlyNumbers, _HtmlFunction___onlySelectedNumberRange, _HtmlFunction___withinMonthlyDate, _HtmlFunction___validateMonthlyDate, _HtmlFunction___zeroPadding, _HtmlFunction___renderWeekday, _HtmlFunction___isLaunchEvent, _AlertSettingWindow_instances, _AlertSettingWindow___setCommandBtnsEvent, _AlertSettingWindow___selectUnit, _AlertSettingWindow___deleteUnit, _AlertSettingWindow___renameAlertUnit, _AlertSettingWindow___reassignThisIndex, _AlertSettingWindow___setBasicAlerts, _AlertSettingWindow___setValueToSpecifyAlertUnit, _AlertSettingWindow___setMySettingAlerts, _AlertSettingWindow___declareAndCreateElements, _AlertSettingWindow___setColorSampleEvent, _AlertSettingWindow___setColorSample, _AlertSettingWindow___setFlashEvent, _AlertSettingWindow___hiddenFlashElements, _AlertSettingWindow___showFlashElements, _AlertSettingWindow___flashEvent, _AlertSettingWindow___setValidation, _AlertSettingWindow___resetOutline, _AlertSettingWindow___writeOutline, _AlertSettingWindow___setValue, _AlertSettingWindow___createDictOfColor, _AlertSettingWindow___isFilledContents;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getDatabase, ref, push, get, set, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { getAuth, signInWithPopup, getRedirectResult, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut, } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 const REDIRECT_OPTIONS = [true, false];
+const RENDER_AUTH_METHOD_OPTIONS = ["signInWithPopup", "onAuthStateChanged", "signInWithRedirect"];
 class FirebaseFunctions {
     constructor(FIREBASE_CONFIG) {
         _FirebaseFunctions_instances.add(this);
         this.isShowTip = {};
         const APP = initializeApp(FIREBASE_CONFIG);
+        this.FIRESTORE_DB = getFirestore(APP);
         this.DB = getDatabase(APP);
         this.PROVIDER = new GoogleAuthProvider();
         this.AUTH = getAuth();
         this.UID = "";
         this.ACCOUNT_DATA = {};
+        this.ACCESS_TOKEN = "";
         this.IV = crypto.getRandomValues(new Uint8Array(12));
         this.SALT = crypto.getRandomValues(new Uint8Array(16));
         this.UtilsFunc = new UtilsFunctions();
         this.preloader = new PreLoader();
         __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___initTipFlg).call(this);
+    }
+    downloadKeyFromFireStore(COLLECTION_NAME, DOCUMENT_ID, FIELD_NAME) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const docRef = doc(this.FIRESTORE_DB, COLLECTION_NAME, DOCUMENT_ID);
+            const docSnap = yield getDoc(docRef);
+            try {
+                if (docSnap.exists()) {
+                    return docSnap.data()[FIELD_NAME];
+                }
+                else {
+                    console.error("APIキーがFirestoreに存在しません");
+                    return null;
+                }
+            }
+            catch (error) {
+                console.error("APIキーの取得に失敗しました:", error);
+                return null;
+            }
+        });
     }
     deleteData(rawPath) {
         const USER_PATH = `${this.UID}/${rawPath}`;
@@ -243,50 +266,81 @@ class FirebaseFunctions {
     loginSystem(LoginSystemArgs) {
         return __awaiter(this, void 0, void 0, function* () {
             const IS_LOGINED = yield __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___isLogined).call(this);
-            console.table(IS_LOGINED);
-            console.log(`----------------in loginSys`);
+            var signResult = "";
             if (IS_LOGINED.isLogined) {
-                __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___logoutFromGoogle).call(this, LoginSystemArgs);
+                signResult = __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___logoutFromGoogle).call(this, LoginSystemArgs);
             }
             else {
-                __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___loginWithGoogle).call(this, LoginSystemArgs);
+                signResult = __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___loginWithGoogle).call(this, LoginSystemArgs);
+            }
+            return signResult;
+        });
+    }
+    renderAuthStatus(ARGS) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (ARGS.METHOD === "signInWithPopup") {
+                const LOGIN_SYSTEM_ARGS = {
+                    HTML_BTN_ELEMENT: ARGS.HTML_BTN_ELEMENT,
+                    SPAN_NAME: ARGS.SPAN_NAME,
+                    isRedirect: false,
+                    CALL_FROM: "in FirebaseFunction, renderAuthStatus, signInWithPopup"
+                };
+                const RESULT = yield __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___loginWithGoogle).call(this, LOGIN_SYSTEM_ARGS);
+                return RESULT;
+            }
+            else if (ARGS.METHOD === "onAuthStateChanged") {
+                const AUTH_DATA = yield __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___isLogined).call(this);
+                const RESULT = __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___applyByAuthStateChange).call(this, ARGS, AUTH_DATA);
+                return RESULT;
+            }
+            else if (ARGS.METHOD === "signInWithRedirect") {
+                const RESULT = __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___applyBySignInWithRedirect).call(this);
             }
         });
     }
-    renderAuthStatus(HTML_BTN_ELEMENT, SPAN_NAME) {
+    doIfThereRedirectResult(ARGS) {
         return __awaiter(this, void 0, void 0, function* () {
-            const AUTH_DATA = yield __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___isLogined).call(this);
-            if (AUTH_DATA.isLogined) {
-                HTML_BTN_ELEMENT.textContent = "ログアウト";
-                SPAN_NAME.textContent = `${AUTH_DATA.accountData.displayName}さん　ようこそ`;
-                SPAN_NAME.style.display = "block";
-                this.UID = AUTH_DATA.accountData.uid;
-                this.ACCOUNT_DATA = AUTH_DATA.accountData;
+            const REDIRECT_RESULT = yield getRedirectResult(this.AUTH);
+            if (REDIRECT_RESULT) {
+                ARGS.HTML_BTN_ELEMENT.textContent = "ログアウト";
+                ARGS.SPAN_NAME.textContent = `${REDIRECT_RESULT.user.displayName}さん　ようこそ`;
+                ARGS.SPAN_NAME.style.display = "block";
+                this.UID = REDIRECT_RESULT.user.uid;
+                this.ACCOUNT_DATA = REDIRECT_RESULT.user;
+                this.ACCESS_TOKEN = REDIRECT_RESULT._tokenResponse.oauthAccessToken;
+                return true;
             }
             else {
-                HTML_BTN_ELEMENT.textContent = "ログイン";
-                SPAN_NAME.textContent = "";
+                return false;
             }
         });
     }
 }
 _FirebaseFunctions_instances = new WeakSet(), _FirebaseFunctions___loginWithGoogle = function _FirebaseFunctions___loginWithGoogle(LoginSystemArgs) {
-    signInWithPopup(this.AUTH, this.PROVIDER).then((result) => {
-        LoginSystemArgs.HTML_BTN_ELEMENT.textContent = "ログアウト";
-        LoginSystemArgs.SPAN_NAME.textContent = `${result.user.displayName}さん　ようこそ`;
-        LoginSystemArgs.SPAN_NAME.style.display = "block";
-        this.UID = result.user.uid;
-        this.ACCOUNT_DATA = result.user;
-        if (LoginSystemArgs.isRedirect && LoginSystemArgs.REDIRECT_METHOD && LoginSystemArgs.CALL_FROM) {
-            new UrlFunction().redirect({
-                METHOD: LoginSystemArgs.REDIRECT_METHOD,
-                CALL_FROM: LoginSystemArgs.CALL_FROM,
-                QUERY: LoginSystemArgs.QUERY
-            });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const result = yield signInWithPopup(this.AUTH, this.PROVIDER);
+            LoginSystemArgs.HTML_BTN_ELEMENT.textContent = "ログアウト";
+            LoginSystemArgs.SPAN_NAME.textContent = `${result.user.displayName}さん　ようこそ`;
+            LoginSystemArgs.SPAN_NAME.style.display = "block";
+            this.UID = result.user.uid;
+            this.ACCOUNT_DATA = result.user;
+            this.ACCESS_TOKEN = result._tokenResponse.oauthAccessToken;
+            this.uploadData("/refreshToken", result._tokenResponse.refreshToken);
+            if (LoginSystemArgs.isRedirect && LoginSystemArgs.REDIRECT_METHOD && LoginSystemArgs.CALL_FROM) {
+                new UrlFunction().redirect({
+                    METHOD: LoginSystemArgs.REDIRECT_METHOD,
+                    CALL_FROM: LoginSystemArgs.CALL_FROM,
+                    QUERY: LoginSystemArgs.QUERY
+                });
+            }
+            return true;
         }
-        return result;
-    }).catch((error) => {
-        alert(error);
+        catch (error) {
+            alert(error);
+            __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___translateSignErrors).call(this, error.message);
+            return false;
+        }
     });
 }, _FirebaseFunctions___logoutFromGoogle = function _FirebaseFunctions___logoutFromGoogle(LoginSystemArgs) {
     signOut(this.AUTH).then(() => {
@@ -295,6 +349,7 @@ _FirebaseFunctions_instances = new WeakSet(), _FirebaseFunctions___loginWithGoog
         LoginSystemArgs.SPAN_NAME.style.display = "none";
         this.UID = "";
         this.ACCOUNT_DATA = {};
+        this.uploadData("/token", "");
         if (LoginSystemArgs.isRedirect && LoginSystemArgs.REDIRECT_METHOD && LoginSystemArgs.CALL_FROM) {
             new UrlFunction().redirect({
                 METHOD: LoginSystemArgs.REDIRECT_METHOD,
@@ -302,22 +357,69 @@ _FirebaseFunctions_instances = new WeakSet(), _FirebaseFunctions___loginWithGoog
                 QUERY: LoginSystemArgs.QUERY
             });
         }
+        return true;
     }).catch((error) => {
         alert(error);
+        __classPrivateFieldGet(this, _FirebaseFunctions_instances, "m", _FirebaseFunctions___translateSignErrors).call(this, error.message);
+        return false;
     });
 }, _FirebaseFunctions___isLogined = function _FirebaseFunctions___isLogined() {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve) => {
-            onAuthStateChanged(this.AUTH, (result) => {
+            onAuthStateChanged(this.AUTH, (result) => __awaiter(this, void 0, void 0, function* () {
                 if (result) {
                     resolve({ isLogined: true, accountData: result });
                 }
                 else {
                     resolve({ isLogined: false, accountData: null });
                 }
-            });
+            }));
         });
     });
+}, _FirebaseFunctions___applyByAuthStateChange = function _FirebaseFunctions___applyByAuthStateChange(ARGS, AUTH_DATA) {
+    if (AUTH_DATA.isLogined) {
+        ARGS.HTML_BTN_ELEMENT.textContent = "ログアウト";
+        ARGS.SPAN_NAME.textContent = `${AUTH_DATA.accountData.displayName}さん　ようこそ`;
+        ARGS.SPAN_NAME.style.display = "block";
+        this.UID = AUTH_DATA.accountData.uid;
+        this.ACCOUNT_DATA = AUTH_DATA.accountData;
+        return true;
+    }
+    else {
+        ARGS.HTML_BTN_ELEMENT.textContent = "ログイン";
+        ARGS.SPAN_NAME.textContent = "";
+        return false;
+    }
+}, _FirebaseFunctions___applyBySignInWithRedirect = function _FirebaseFunctions___applyBySignInWithRedirect() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield signInWithRedirect(this.AUTH, this.PROVIDER);
+        }
+        catch (error) {
+            alert(`in FirebaseFunctions, renderAuthStatus, __applyBySignInWithRedirect. ログインエラーです。`);
+        }
+    });
+}, _FirebaseFunctions___translateSignErrors = function _FirebaseFunctions___translateSignErrors(RAW_ERROR_MESSAGE) {
+    const match = RAW_ERROR_MESSAGE.match(/\(([^)]+)\)/);
+    const EXTRACTED_MESSAGE = match ? match[1] : RAW_ERROR_MESSAGE;
+    const RECORD_ERROR_MESSAGE = {
+        "auth/popup-closed-by-user": "ポップアップを閉じられました。認証が未完了です。もう一度認証してください。",
+        "auth/cancelled-popup-request": "すでにほかのポップアップが出ています。以前のポップアップを閉じてください。",
+        "auth/popup-blocked": "ブラウザがポップアップをブロックしました。ブラウザの設定でポップアップを許可してください。",
+        "auth/operation-not-allowed": "Google認証が有効になっていません。開発者にFirebase Authenticationを確認するよう問い合わせてください。",
+        "auth/invalid-credential": "有効期限が切れています。もう一度認証してください。",
+        "auth/user-disabled": "Firebaseでユーザーアカウントが無効化されています。開発者にユーザーアカウント名を教えてください。",
+        "auth/wrong-password": "パスワードが間違っています。",
+        "auth/network-request-failed": "ネットワークエラーです。ネット接続を確認して、再試行してください。",
+        "auth/too-many-requests": "短期間に何度もログインされたため、一時的にブロックされています。時間をおいてからお試しください。",
+        "auth/timeout": "ネットワークエラーです。ネット接続を確認して、再試行してください。"
+    };
+    if (EXTRACTED_MESSAGE in RECORD_ERROR_MESSAGE) {
+        alert(RECORD_ERROR_MESSAGE[EXTRACTED_MESSAGE]);
+    }
+    else {
+        alert("サインイン・アウト時に予期せぬエラーが生じました。");
+    }
 }, _FirebaseFunctions___fetchGoogleAccountData = function _FirebaseFunctions___fetchGoogleAccountData() {
     onAuthStateChanged(this.AUTH, (user) => {
         if (user) {
@@ -545,7 +647,7 @@ class UrlFunction {
     constructor() {
         _UrlFunction_instances.add(this);
     }
-    extractHtmlTitle(rawHtml) {
+    extractHtmlTitle(rawHtml, CALL_FROM) {
         const url = new URL(rawHtml);
         let htmlLink = url.pathname;
         htmlLink = htmlLink.replace(/\/$/, "");
@@ -559,11 +661,11 @@ class UrlFunction {
                 return htmlTitle;
             }
             else {
-                alert(`Error: Utils.js, UrlFunction, extractHtmlTitle, 正規表現に一致しませんでした。htmlLink is ${htmlLink}, Reg is ^(.+)(?:\.github\.io|\.html)?\/?$`);
+                alert(`Error: Utils.js, UrlFunction, extractHtmlTitle, 正規表現に一致しませんでした。htmlLink is ${htmlLink}, Reg is ^(.+)(?:\.github\.io|\.html)?\/?$\ncall from ${CALL_FROM}`);
             }
         }
         else {
-            alert(`Error: Utils.js, UrlFunction, extractHtmlTitle, configured_item is undefined. htmlLink is ${htmlLink}`);
+            alert(`Error: Utils.js, UrlFunction, extractHtmlTitle, configured_item is undefined. htmlLink is ${htmlLink}\ncall from ${CALL_FROM}`);
         }
     }
     __deleteQueryPart(URL) {
@@ -578,7 +680,7 @@ class UrlFunction {
     redirect(REDIRECT_DATA) {
         if (REDIRECT_DATA.METHOD === "toSelectedPage") {
             if (REDIRECT_DATA.PAGE_TITLE) {
-                var url = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___composeURLbyPageTitle).call(this, REDIRECT_DATA.PAGE_TITLE);
+                var url = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___composeURLbyPageTitle).call(this, REDIRECT_DATA.PAGE_TITLE, REDIRECT_DATA.CALL_FROM);
                 if (REDIRECT_DATA.QUERY) {
                     let query = this.__convertDataToQueryString(REDIRECT_DATA.QUERY);
                     url += `?data=${query}`;
@@ -591,11 +693,11 @@ class UrlFunction {
                 }
             }
             else {
-                alert("in UrlFunction, redirect. composeURLbyPageTitleが引数に渡されました。しかし、必要なPAGE_TITLEが引数にありません。指定してください。");
+                alert(`in UrlFunction, redirect. composeURLbyPageTitleが引数に渡されました。しかし、必要なPAGE_TITLEが引数にありません。指定してください。\ncall from${CALL_FROM}`);
             }
         }
         else if (REDIRECT_DATA.METHOD === "toHP") {
-            var url = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___returnHomePageURL).call(this);
+            var url = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___returnHomePageURL).call(this, REDIRECT_DATA.CALL_FROM);
             if (REDIRECT_DATA.QUERY) {
                 let query = this.__convertDataToQueryString(REDIRECT_DATA.QUERY);
                 url += `?data=${query}`;
@@ -632,37 +734,30 @@ class UrlFunction {
         console.log(`Error: in UrlFunction, ${METHOD_NAME}, ${INFO}`);
     }
 }
-_UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = function _UrlFunction___composeURLbyPageTitle(PAGE_TITLE, URL = window.location.href) {
+_UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = function _UrlFunction___composeURLbyPageTitle(PAGE_TITLE, CALL_FROM, URL = window.location.href) {
     const PAGE_TITLE_REG_WITH_SYNBOLE = /\/([a-zA-Z_\-.・\(\)\[\]\{},@]*)\.html$/;
     URL = this.__deleteQueryPart(URL);
     if (URL.match(/github/)) {
         const MATCHED_ITEMS = URL.match(/https:\/{2}syuubunndou.github.io\/[/w/.]*/);
         if (MATCHED_ITEMS) {
             const FUNDATIONAL_URL = MATCHED_ITEMS[0];
-            const FUNDATIONAL_PAGE_NAME = this.extractHtmlTitle(FUNDATIONAL_URL);
-            if (FUNDATIONAL_PAGE_NAME == PAGE_TITLE) {
-                alert("ホームページ名とPAGE_TITLEは違う名前でなければなりません。\n〇　https://syuubunndou.github.io/ホームページ名.github.io/サブページ名.html");
-            }
-            else {
-                if (URL.match(/\.html$/)) {
-                    const IS_MATCH = URL.match(PAGE_TITLE_REG_WITH_SYNBOLE) ? true : false;
-                    if (IS_MATCH) {
-                        var composedURL = URL.replace(PAGE_TITLE_REG_WITH_SYNBOLE, `/${PAGE_TITLE}.html`);
-                        return composedURL;
-                    }
-                    else {
-                        alert(`ファイル名エラーです。htmlファイル名にひらがなや漢字が含まれていませんか？ url : ${URL}`);
-                    }
-                }
-                else {
-                    var composedURL = `${URL}${PAGE_TITLE}.html`;
+            if (URL.match(/\.html$/)) {
+                const IS_MATCH = URL.match(PAGE_TITLE_REG_WITH_SYNBOLE) ? true : false;
+                if (IS_MATCH) {
+                    var composedURL = URL.replace(PAGE_TITLE_REG_WITH_SYNBOLE, `/${PAGE_TITLE}.html`);
                     return composedURL;
                 }
+                else {
+                    alert(`ファイル名エラーです。htmlファイル名にひらがなや漢字が含まれていませんか？ url : ${URL} \ncall from${CALL_FROM}`);
+                }
+            }
+            else {
+                var composedURL = `${URL}${PAGE_TITLE}.html`;
+                return composedURL;
             }
         }
         else {
-            alert(`Error: Utils.js, UrlFunctions, composedURLbyPageTitle, 正規表現にマッチしたものはありません。URL is ${URL}`);
-            console.log(`URL is ${URL}, 正規表現: https:\/{2}syuubunndou.github.io\/[/w/.]*`);
+            alert(`Error: Utils.js, UrlFunctions, composedURLbyPageTitle, 正規表現にマッチしたものはありません。URL is ${URL} \ncall from${CALL_FROM}`);
             return;
         }
     }
@@ -673,10 +768,10 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
             return composedURL;
         }
         else {
-            alert(`ファイル名エラーです。htmlファイル名にひらがなや漢字が含まれていませんか？ url : ${URL}`);
+            alert(`ファイル名エラーです。htmlファイル名にひらがなや漢字が含まれていませんか？ url : ${URL} \ncall from${CALL_FROM}`);
         }
     }
-}, _UrlFunction___returnHomePageURL = function _UrlFunction___returnHomePageURL(homePageTitle = "index") {
+}, _UrlFunction___returnHomePageURL = function _UrlFunction___returnHomePageURL(CALL_FROM, homePageTitle = "index") {
     const URL = this.__deleteQueryPart(window.location.href);
     if (URL.match(/github/)) {
         const MATCHED_ITEMS = URL.match(/https:\/{2}syuubunndou.github.io\/[\w\.]*\//);
@@ -685,13 +780,12 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
             return gitHomePageURL;
         }
         else {
-            alert(`Error: Utils.js, UrlFunction, returnHomePageURL, 正規表現にマッチしたものはありません。 URL is : ${URL}`);
-            console.log(`URL is ${URL}`);
+            alert(`Error: Utils.js, UrlFunction, returnHomePageURL, 正規表現にマッチしたものはありません。 URL is : ${URL}\ncall from${CALL_FROM}`);
             return;
         }
     }
     else {
-        var localHomePageURL = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___composeURLbyPageTitle).call(this, homePageTitle, URL);
+        var localHomePageURL = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___composeURLbyPageTitle).call(this, homePageTitle, URL, CALL_FROM);
         return localHomePageURL;
     }
 };
@@ -1149,6 +1243,155 @@ class PreLoader {
         this.STYLE.textContent = basicStyleContext + animateStyleContext;
         document.head.appendChild(this.STYLE);
     }
+    boundBalls({ BACKGROUND_COLOR = `rgba(0, 0, 0, 0.8)`, FONT_COLOR = `rgb(255, 255, 255)`, LEFT_PX = "0px", DISPLAY_CONTENT = "" } = {}) {
+        document.body.prepend(this.PRELOADER_MODAL);
+        this.PRELOADER_MODAL.innerHTML = `
+            
+            <img src="labo-logo.png" class="labo-logo" id="labo-logo">
+            <div class="loading">
+                <div class="wrapper">
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="shadow"></div>
+                <div class="shadow"></div>
+                <div class="shadow"></div>
+            </div>
+            <div class="exp">${DISPLAY_CONTENT}</div>
+        `;
+        var basicStyleContext = `
+                                    .labo-logo {
+                                        position: relative;
+                                        top: 30%;
+                                        margin: auto;
+                                        display: block;
+                                        width: auto;
+                                    }
+                                    .loading {
+                                        position: relative;
+                                        top: 32%;
+                                        width: 100%;
+                                        text-align: center;
+                                    }
+
+                                    .loading span {
+                                        color: rgb(0,0,0);
+                                        font-size: 30px;
+                                    }
+
+                                    .loading .animate {
+                                        position: absolute;
+                                        top: 0;
+                                    }
+                                    .preloader {
+                                        position: fixed;
+                                        top: 0px;
+                                        background-color: ${BACKGROUND_COLOR};
+                                        width: 100%;
+                                        height: 100%;
+                                        z-index: 99;
+                                    }
+                                    body{
+                                        padding:0;
+                                        margin:0;
+                                        width:100%;
+                                        height:100vh;
+                                   
+                                    }
+                                    .wrapper{
+                                        width:200px;
+                                        height:60px;
+                                        position: absolute;
+                                        left:50%;
+                                        top:50%;
+                                        transform: translate(-50%, -50%);
+                                    }
+                                    .circle{
+                                        width:20px;
+                                        height:20px;
+                                        position: absolute;
+                                        border-radius: 50%;
+                                        background-color: #fff;
+                                        left:15%;
+                                        transform-origin: 50%;
+                                        animation: circle .5s alternate infinite ease;
+                                    }
+
+                                    @keyframes circle{
+                                        0%{
+                                            top:100px;
+                                            height:5px;
+                                            border-radius: 50px 50px 25px 25px;
+                                            transform: scaleX(1.7);
+                                        }
+                                        40%{
+                                            height:20px;
+                                            border-radius: 50%;
+                                            transform: scaleX(1);
+                                        }
+                                        100%{
+                                            top:0%;
+                                        }
+                                    }
+                                    .circle:nth-child(2){
+                                        left:45%;
+                                        animation-delay: .2s;
+                                    }
+                                    .circle:nth-child(3){
+                                        left:auto;
+                                        right:15%;
+                                        animation-delay: .3s;
+                                    }
+                                    .shadow{
+                                        width:20px;
+                                        height:4px;
+                                        border-radius: 50%;
+                                        background-color: rgba(0,0,0,.5);
+                                        position: absolute;
+                                        top:102px;
+                                        transform-origin: 50%;
+                                        z-index: -1;
+                                        left:15%;
+                                        filter: blur(1px);
+                                        animation: shadow .5s alternate infinite ease;
+                                    }
+
+                                    @keyframes shadow{
+                                        0%{
+                                            transform: scaleX(1.5);
+                                        }
+                                        40%{
+                                            transform: scaleX(1);
+                                            opacity: .7;
+                                        }
+                                        100%{
+                                            transform: scaleX(.2);
+                                            opacity: .4;
+                                        }
+                                    }
+                                    .shadow:nth-child(4){
+                                        left: 45%;
+                                        animation-delay: .2s
+                                    }
+                                    .shadow:nth-child(5){
+                                        left:auto;
+                                        right:15%;
+                                        animation-delay: .3s;
+                                    }
+
+                                    .exp{
+                                        position    : relative;
+                                        top         : 150px;
+                                        left        : ${LEFT_PX};
+                                        color       : ${FONT_COLOR};
+                                        font-size   : 45px;
+                                    }
+                                   
+                              
+        `;
+        this.STYLE.textContent = basicStyleContext;
+        document.head.appendChild(this.STYLE);
+    }
     closePreLoader() {
         return __awaiter(this, void 0, void 0, function* () {
             const AnimateFunc = new AnimateFunctions();
@@ -1160,10 +1403,208 @@ class PreLoader {
         });
     }
 }
+const EVENT_COLORS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+class GoogleCalendarApp {
+    constructor(FIREBASE_APP) {
+        this.CLIENT_ID = '357784436174-3b0e85mq2b8s6ijj3lh9drc4hg1c8m5v.apps.googleusercontent.com';
+        this.DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+        this.SCOPES = 'https://www.googleapis.com/auth/calendar';
+        this.TOKEN_CLIENT = undefined;
+        this.GAPI_INITED = false;
+        this.G_IS_INITED = false;
+        this.FIREBASE_APP = FIREBASE_APP;
+        this.PreloaderFunc = new PreLoader();
+        const BTN = document.createElement("button");
+        const SPAN = document.createElement("span");
+        this.FIREBASE_APP.renderAuthStatus({ HTML_BTN_ELEMENT: BTN, SPAN_NAME: SPAN, METHOD: "onAuthStateChanged" });
+    }
+    init() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            this.PreloaderFunc.boundBalls({
+                DISPLAY_CONTENT: "Google Calenderと接続中・・・",
+                BACKGROUND_COLOR: "rgba(5, 90, 70, 0.6)"
+            });
+            yield new UtilsFunctions().sleep(2000);
+            let key = yield this.FIREBASE_APP.downloadKeyFromFireStore("secret", "apiKeys", "googleCalendarApiKey");
+            if (key) {
+            }
+            else {
+                alert("in GoogleCalenderApp. api key is none. check init() key. 開発者に連絡してください。");
+                return;
+            }
+            yield this.loadGoogleAPIs(key);
+            const ACCESS_TOKEN_DATA = yield this.FIREBASE_APP.downloadData("/accessToken");
+            if (ACCESS_TOKEN_DATA) {
+                const { token, expiresAt } = ACCESS_TOKEN_DATA;
+                const currentTime = Date.now();
+                if (currentTime < expiresAt) {
+                    gapi.auth.setToken({ access_token: token });
+                    this.PreloaderFunc.closePreLoader();
+                    this.GAPI_INITED = true;
+                    return;
+                }
+                else {
+                    console.log("Access token expired. Proceeding with re-authentication.");
+                }
+            }
+            else {
+                console.log("No access token found in Firebase. Proceeding with authentication.");
+            }
+            this.handleAuthClick();
+            (_a = document.getElementById("signout_button")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", () => this.handleSignoutClick());
+        });
+    }
+    loadGoogleAPIs(KEY) {
+        return __awaiter(this, void 0, void 0, function* () {
+            gapi.load('client', () => __awaiter(this, void 0, void 0, function* () {
+                yield gapi.client.init({
+                    apiKey: KEY,
+                    discoveryDocs: [this.DISCOVERY_DOC],
+                });
+                this.GAPI_INITED = true;
+            }));
+            this.TOKEN_CLIENT = google.accounts.oauth2.initTokenClient({
+                client_id: this.CLIENT_ID,
+                scope: this.SCOPES,
+                prompt: 'consent',
+                access_type: 'offline',
+                callback: (resp) => __awaiter(this, void 0, void 0, function* () { return yield this.authCallback(resp); }),
+            });
+            this.G_IS_INITED = true;
+        });
+    }
+    handleAuthClick() {
+        var _a, _b;
+        if (gapi.client.getToken() === null) {
+            (_a = this.TOKEN_CLIENT) === null || _a === void 0 ? void 0 : _a.requestAccessToken({ prompt: 'consent' });
+        }
+        else {
+            (_b = this.TOKEN_CLIENT) === null || _b === void 0 ? void 0 : _b.requestAccessToken({ prompt: '' });
+        }
+    }
+    handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+            google.accounts.oauth2.revoke(token.access_token);
+            gapi.client.setToken(null);
+        }
+    }
+    authCallback(resp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (resp.error !== undefined) {
+                throw resp;
+            }
+            const TARGET_TOKEN = resp.access_token;
+            const EXPIRES_IN = resp.expires_in;
+            const expirationTime = Date.now() + EXPIRES_IN * 1000;
+            this.FIREBASE_APP.uploadData("/accessToken", { token: TARGET_TOKEN, expiresAt: expirationTime });
+            this.PreloaderFunc.closePreLoader();
+        });
+    }
+    refreshAccessToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = new URLSearchParams();
+            let clientSecret = yield this.FIREBASE_APP.downloadKeyFromFireStore("secretID", "zrr92vt7G00bCXybBmIg", "clientID");
+            params.append('client_id', this.CLIENT_ID);
+            params.append('client_secret', clientSecret);
+            params.append('refresh_token', refreshToken);
+            params.append('grant_type', 'refresh_token');
+            try {
+                const response = yield fetch('https://oauth2.googleapis.com/token', {
+                    method: 'POST',
+                    body: params,
+                });
+                const data = yield response.json();
+                if (data.error) {
+                    throw new Error(`Error refreshing access token: ${data.error}`);
+                }
+                const newAccessToken = data.access_token;
+                const expiresIn = data.expires_in;
+                gapi.auth.setToken({
+                    access_token: newAccessToken,
+                    expires_in: expiresIn,
+                });
+            }
+            catch (error) {
+                console.error('Error refreshing access token:', error);
+            }
+        });
+    }
+    addTask(ARGS) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const event = {
+                'summary': ARGS.SUMMARY,
+                'description': ARGS.CONTENT,
+                'start': {
+                    'dateTime': ARGS.DEADLINE,
+                    'timeZone': 'America/Los_Angeles'
+                },
+                'end': {
+                    'dateTime': ARGS.DEADLINE,
+                    'timeZone': 'America/Los_Angeles'
+                },
+                'reminders': {
+                    'useDefault': false,
+                    'overrides': [
+                        { 'method': 'popup', 'minutes': 10 }
+                    ]
+                },
+                'colorId': ARGS.COLOR
+            };
+            gapi.client.calendar.events.insert({
+                'calendarId': 'primary',
+                'resource': event,
+            }).then((response) => {
+                const eventId = response.result.id;
+                this.FIREBASE_APP.uploadData(`tasks/${ARGS.TASK_ID}/googleCalenderEventID`, eventId);
+            });
+        });
+    }
+    editTask(ARGS) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const event = {
+                'summary': ARGS.SUMMARY,
+                'description': ARGS.CONTENT,
+                'start': {
+                    'dateTime': ARGS.DEADLINE,
+                    'timeZone': 'America/Los_Angeles'
+                },
+                'end': {
+                    'dateTime': ARGS.DEADLINE,
+                    'timeZone': 'America/Los_Angeles'
+                },
+                'reminders': {
+                    'useDefault': false,
+                    'overrides': [
+                        { 'method': 'popup', 'minutes': 10 }
+                    ]
+                },
+                'colorId': ARGS.COLOR
+            };
+            yield gapi.client.calendar.events.update({
+                'calendarId': 'primary',
+                'eventId': ARGS.TASK_ID,
+                'resource': event
+            }).then((response) => {
+            });
+        });
+    }
+    deleteEvent(EVENT_ID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = {
+                calendarId: 'primary',
+                eventId: EVENT_ID
+            };
+            const response = yield gapi.client.calendar.events.delete(request);
+        });
+    }
+}
 class TaskWindow {
-    constructor(TASK, FirebaseApp) {
+    constructor(TASK, FirebaseApp, GoogleCalenderApp) {
         this.ID = new HtmlFunction().provideUniqueID();
         this.FirebaseApp = FirebaseApp;
+        this.GoogleCalenderApp = GoogleCalenderApp;
         this.UtilsFunc = new UtilsFunctions();
         this.UrlFunc = new UrlFunction();
         this.HtmlFunc = new HtmlFunction();
@@ -1172,7 +1613,6 @@ class TaskWindow {
         this.makeWindow();
     }
     makeWindow() {
-        console.log(this.TASK_DATA);
         const TASK_WINDOW = document.createElement("div");
         TASK_WINDOW.className = "task-window";
         TASK_WINDOW.id = `taskWindow${this.ID}`;
@@ -1467,7 +1907,12 @@ class TaskWindow {
         });
         const BTN_FINISH = document.getElementById(`btnFinish${this.ID}`);
         BTN_FINISH.addEventListener("click", () => {
-            this.__finishTask();
+            if (this.TASK_DATA.REPEAT.option === "no-repeat") {
+                this.__finishTask();
+            }
+            else {
+                this.__sendRepeatTask();
+            }
         });
         const BTN_EDIT = document.getElementById(`btnEdit${this.ID}`);
         BTN_EDIT.addEventListener("click", () => {
@@ -1485,26 +1930,28 @@ class TaskWindow {
         }
     }
     __finishTask() {
-        if (this.TASK_DATA.REPEAT.option === "no-repeat") {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.__deleteFromGoogleCalender();
             this.FirebaseApp.deleteData(`tasks/${this.TASK_DATA.TASK_ID}`);
             this.UrlFunc.redirect({
                 METHOD: "toHP",
                 CALL_FROM: "TaskWindow, finishTask"
             });
-        }
-        else {
-            this.__sendRepeatTask();
-        }
+        });
+    }
+    __deleteFromGoogleCalender() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.GoogleCalenderApp.deleteEvent(this.TASK_DATA.EVENT_ID);
+        });
     }
     __sendRepeatTask() {
         return __awaiter(this, void 0, void 0, function* () {
             const DATA = yield this.__produceTaskData();
-            console.log(DATA);
             const IS_LOGIEND = this.FirebaseApp.isLogined();
             if (IS_LOGIEND) {
                 const TASK_ID = this.TASK_DATA.TASK_ID;
                 DATA["id"] = TASK_ID;
-                const ENCRYPT_DATAS = yield this.FirebaseApp.encryptData(DATA);
+                const ENCRYPT_DATAS = yield this.FirebaseApp.encryptData(DATA.sendData);
                 if (ENCRYPT_DATAS) {
                     if (TASK_ID) {
                     }
@@ -1512,7 +1959,8 @@ class TaskWindow {
                         alert(`ERROR: in TaskManager, sendEditData. TaskIDがundefinedです。データの編集ができませんでした。zin-syuubunndou@gmail.comまでご連絡ください。`);
                         return;
                     }
-                    this.FirebaseApp.uploadData(`tasks/${TASK_ID}`, ENCRYPT_DATAS);
+                    this.FirebaseApp.uploadData(`tasks/${TASK_ID}/taskData`, ENCRYPT_DATAS);
+                    yield this.__sendRepeatDataToGoogleCalender(DATA.rawData);
                     this.UrlFunc.redirect({
                         METHOD: "toHP",
                         CALL_FROM: "TaskManager, sendEditData"
@@ -1528,17 +1976,42 @@ class TaskWindow {
             }
         });
     }
+    __sendRepeatDataToGoogleCalender(DATA) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const YEAR = parseInt(DATA.deadline.year);
+            const MONTH = parseInt(DATA.deadline.month);
+            const DAY = parseInt(DATA.deadline.day);
+            const HOUR = parseInt(DATA.deadline.hour);
+            const MINUTE = parseInt(DATA.deadline.minute);
+            const DEADLINE_ISOSTRING = new Date(YEAR, MONTH - 1, DAY, HOUR, MINUTE).toISOString();
+            const EVENT_ARGS = {
+                SUMMARY: DATA.taskName.data,
+                DEADLINE: DEADLINE_ISOSTRING,
+                CONTENT: DATA.content.data,
+                COLOR: "2",
+                TASK_ID: this.TASK_DATA.EVENT_ID
+            };
+            yield this.GoogleCalenderApp.editTask(EVENT_ARGS);
+        });
+    }
     __produceTaskData() {
         return __awaiter(this, void 0, void 0, function* () {
+            const DATAS = yield this.__produceMainWindowData();
             const DATA = {};
             DATA["AlertWindow"] = this.TASK_DATA.ALERT_CONDITIONS;
-            DATA["MainWindow"] = yield this.__produceMainWindowData();
-            return DATA;
+            if (Object.keys(DATAS.encryptedData).length === 0) {
+                DATA["MainWindow"] = DATAS.rawData;
+            }
+            else {
+                DATA["MainWindow"] = DATAS.encryptedData;
+            }
+            return { sendData: DATA, rawData: DATAS.rawData };
         });
     }
     __produceMainWindowData() {
         return __awaiter(this, void 0, void 0, function* () {
-            const DATA = {};
+            const EBCRYPTED_DATA = {};
+            const RAW_DATA = {};
             const PASSWORD_ENTRY1 = document.getElementById("addKey1");
             var password = "";
             if (PASSWORD_ENTRY1) {
@@ -1553,18 +2026,16 @@ class TaskWindow {
                 password = "";
             }
             if (password) {
-                DATA["taskName"] = yield this.FirebaseApp.encryptData(this.TASK_DATA.TITLE.data, password);
-                DATA["deadline"] = this.__composeDeadlineDataByRepeat();
-                DATA["repeat"] = this.TASK_DATA.REPEAT;
-                DATA["content"] = yield this.FirebaseApp.encryptData(this.TASK_DATA.CONTENT.data, password);
+                EBCRYPTED_DATA["taskName"] = yield this.FirebaseApp.encryptData(this.TASK_DATA.TITLE.data, password);
+                EBCRYPTED_DATA["deadline"] = this.__composeDeadlineDataByRepeat();
+                EBCRYPTED_DATA["repeat"] = this.TASK_DATA.REPEAT;
+                EBCRYPTED_DATA["content"] = yield this.FirebaseApp.encryptData(this.TASK_DATA.CONTENT.data, password);
             }
-            else {
-                DATA["taskName"] = this.TASK_DATA.TITLE;
-                DATA["deadline"] = this.__composeDeadlineDataByRepeat();
-                DATA["repeat"] = this.TASK_DATA.REPEAT;
-                DATA["content"] = this.TASK_DATA.CONTENT;
-            }
-            return DATA;
+            RAW_DATA["taskName"] = this.TASK_DATA.TITLE;
+            RAW_DATA["deadline"] = this.__composeDeadlineDataByRepeat();
+            RAW_DATA["repeat"] = this.TASK_DATA.REPEAT;
+            RAW_DATA["content"] = this.TASK_DATA.CONTENT;
+            return { rawData: RAW_DATA, encryptedData: EBCRYPTED_DATA };
         });
     }
     __composeDeadlineDataByRepeat() {
@@ -1630,7 +2101,8 @@ class TaskWindow {
                 ALERT_CONDITIONS: this.TASK_DATA.ALERT_CONDITIONS,
                 SALT: this.TASK_DATA.SALT,
                 IV: this.TASK_DATA.IV,
-                TASK_ID: this.TASK_DATA.TASK_ID
+                TASK_ID: this.TASK_DATA.TASK_ID,
+                EVENT_ID: this.TASK_DATA.EVENT_ID
             };
             this.UrlFunc.redirect({
                 METHOD: "toSelectedPage",
@@ -2585,9 +3057,7 @@ class AlertSettingWindow {
 _AlertSettingWindow_instances = new WeakSet(), _AlertSettingWindow___setCommandBtnsEvent = function _AlertSettingWindow___setCommandBtnsEvent() {
     const ADD_BTN = document.getElementById(`btnAdd`);
     ADD_BTN.addEventListener("click", () => {
-        console.log(`before do add event, index is ${this.INDEX}`);
         this.makeAlertUnit();
-        console.log(`now index is ${this.INDEX}`);
     });
     const SELECT_UNIT_UP_BTN = document.getElementById(`btnUp`);
     SELECT_UNIT_UP_BTN.addEventListener("click", () => {
@@ -3375,6 +3845,14 @@ _AlertSettingWindow_instances = new WeakSet(), _AlertSettingWindow___setCommandB
 };
 class TaskManager {
     constructor() {
+        const OBJ = { encrypto: {} };
+        console.log(Object.keys(OBJ.encrypto).length);
+        if (Object.keys(OBJ.encrypto).length === 0) {
+            console.log("obj is empty");
+        }
+        else {
+            console.log("obj have items");
+        }
         this.UrlFunc = new UrlFunction();
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCE7N5hBYZzbMn9Xn_fEAwM1I-_FU4uVT0",
@@ -3391,6 +3869,7 @@ class TaskManager {
         this.UtilsFunc = new UtilsFunctions();
         this.AnimateFunc = new AnimateFunctions();
         this.PreloaderFunc = new PreLoader();
+        this.GoogleCalenderApp = null;
         this.WINDOWS = [];
         this.AlertSettingWindow = new AlertSettingWindow();
         this.executeByURL();
@@ -3398,15 +3877,20 @@ class TaskManager {
     ;
     executeByURL() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.PreloaderFunc.charWaterflow();
-            yield this.__renderLoginStatus();
-            this.__showSignifierPromptLogin();
             const LABO_LOGO = document.getElementById("headerLaboLogo");
             const URL = window.location.href;
             const PAGE_TITLE = this.UrlFunc.extractHtmlTitle(URL);
+            const RENDER_RESULT = yield this.__renderLoginStatus();
+            if (RENDER_RESULT) {
+                this.GoogleCalenderApp = new GoogleCalendarApp(this.FirebaseApp);
+                yield this.GoogleCalenderApp.init();
+            }
+            else {
+                this.__showSignifierPromptLogin();
+            }
             if (PAGE_TITLE) {
                 this.setHeaderEvents(PAGE_TITLE);
-                if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager") {
+                if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager" || PAGE_TITLE === "test_TaskManager") {
                     yield this.renderTaskWindows();
                 }
                 else if (PAGE_TITLE === "add-task" || PAGE_TITLE === "edit-task") {
@@ -3418,19 +3902,18 @@ class TaskManager {
                     if (PAGE_TITLE === "add-task") {
                         this.setValidationsAndPlaceholders();
                         this.AlertSettingWindow.makeAlertUnit();
-                        this.setAddTaskEvent();
+                        yield this.setAddTaskEvent();
                     }
                     else if (PAGE_TITLE === "edit-task") {
                         this.setEditValidationsAndPlaceholders();
                         this.setCurrentValue();
                         this.setEditTaskEvent();
                     }
+                    this.AnimateFunc.fadeIn(LABO_LOGO);
                 }
                 else {
                     alert(`無効なページタイトルです。: Pagetitle = ${PAGE_TITLE}`);
                 }
-                this.PreloaderFunc.closePreLoader();
-                this.AnimateFunc.fadeIn(LABO_LOGO);
             }
             else {
                 this.UrlFunc.alertError("extractHtmlTitle", `TaskManager内、executeByURLで無効なURLでした。URL:${URL}`);
@@ -3441,12 +3924,17 @@ class TaskManager {
         return __awaiter(this, void 0, void 0, function* () {
             const SPAN_NAME = document.getElementById("headerUserName");
             const LOGIN_BTN = document.getElementById("menuBtnLogin");
-            yield this.FirebaseApp.renderAuthStatus(LOGIN_BTN, SPAN_NAME);
+            const RENDER_AUTH_ARGS = {
+                HTML_BTN_ELEMENT: LOGIN_BTN,
+                SPAN_NAME: SPAN_NAME,
+                METHOD: "onAuthStateChanged"
+            };
+            const RESULT = yield this.FirebaseApp.renderAuthStatus(RENDER_AUTH_ARGS);
+            return RESULT;
         });
     }
     __showSignifierPromptLogin() {
         const SPAN_NAME = document.getElementById("headerUserName");
-        console.log(SPAN_NAME.textContent);
         if (SPAN_NAME.textContent) {
         }
         else {
@@ -3470,7 +3958,7 @@ class TaskManager {
         }
     }
     setHeaderEvents(PAGE_TITLE) {
-        if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager") {
+        if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager" || PAGE_TITLE === "test_TaskManager") {
             const ADD_BTN = document.getElementById("headerAddBtn");
             ADD_BTN.addEventListener("click", () => {
                 this.UrlFunc.redirect({
@@ -3489,7 +3977,7 @@ class TaskManager {
                 });
             });
         }
-        if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager" || PAGE_TITLE === "add-task") {
+        if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager" || PAGE_TITLE === "test_TaskManager" || PAGE_TITLE === "add-task") {
             this.__setMenuEvents();
             const LABO_LOGO = document.getElementById("headerLaboLogo");
             LABO_LOGO.addEventListener("click", () => {
@@ -3539,9 +4027,10 @@ class TaskManager {
                     ALERT_CONDITIONS: data.data.AlertWindow,
                     SALT: data.salt,
                     IV: data.iv,
-                    TASK_ID: data.key
+                    TASK_ID: data.key,
+                    EVENT_ID: data.eventID
                 };
-                this.WINDOWS.push(new TaskWindow(taskWindowData, this.FirebaseApp));
+                this.WINDOWS.push(new TaskWindow(taskWindowData, this.FirebaseApp, this.GoogleCalenderApp));
             }
         });
     }
@@ -3550,14 +4039,18 @@ class TaskManager {
             const RAW_DOWNLOAD_DATAS = yield this.FirebaseApp.downloadData("tasks/");
             const DATAS = [];
             for (const KEY in RAW_DOWNLOAD_DATAS) {
-                const PARSED_ITEM = JSON.parse(RAW_DOWNLOAD_DATAS[KEY]);
+                const PARSED_TASK_RECORD = RAW_DOWNLOAD_DATAS[KEY];
+                const PARSED_ITEM = JSON.parse(PARSED_TASK_RECORD.taskData);
+                const EVENT_ID = JSON.parse(PARSED_TASK_RECORD.googleCalenderEventID)[1];
                 const DECRYPTED_DATA = yield this.FirebaseApp.decryptData(PARSED_ITEM.data, PARSED_ITEM.salt, PARSED_ITEM.iv);
+                console.log(DECRYPTED_DATA);
                 const DATE = new Date(Date.UTC(DECRYPTED_DATA.MainWindow.deadline.year, DECRYPTED_DATA.MainWindow.deadline.month - 1, DECRYPTED_DATA.MainWindow.deadline.day, DECRYPTED_DATA.MainWindow.deadline.hour, DECRYPTED_DATA.MainWindow.deadline.minute));
                 DATAS.push({ deadline: DATE,
                     data: DECRYPTED_DATA,
                     salt: PARSED_ITEM.salt,
                     iv: PARSED_ITEM.iv,
-                    key: KEY
+                    key: KEY,
+                    eventID: EVENT_ID
                 });
             }
             DATAS.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
@@ -3617,14 +4110,23 @@ class TaskManager {
                 this.__setSignifierUnmatchPassword();
                 return;
             }
+            const DATAS = yield this.__extractInputMainWindowData();
             data["AlertWindow"] = alertData;
-            data["MainWindow"] = yield this.__extractInputMainWindowData();
-            return data;
+            console.log(DATAS);
+            if (Object.keys(DATAS.encryptedData).length === 0) {
+                console.log("in raw data");
+                data["MainWindow"] = DATAS.rawData;
+            }
+            else {
+                data["MainWindow"] = DATAS.encryptedData;
+            }
+            return { sendData: data, rawData: DATAS.rawData };
         });
     }
     __extractInputMainWindowData() {
         return __awaiter(this, void 0, void 0, function* () {
-            const DATA = {};
+            const RAW_DATA = {};
+            const ENCRYPTED_DATA = {};
             const SPAN_TITLE = document.getElementById("addTitle");
             const SPAN_YEAR = document.getElementById("deadlineYear");
             const SPAN_MONTH = document.getElementById("deadlineMonth");
@@ -3641,8 +4143,8 @@ class TaskManager {
             }
             if (password) {
                 const TASK_NAME = typeof SPAN_TITLE.innerHTML === "string" ? yield this.FirebaseApp.encryptData(SPAN_TITLE.innerHTML, password) : "";
-                DATA["taskName"] = typeof TASK_NAME === "object" ? TASK_NAME : alert(`Error: 暗号化ができませんでした。開発者に連絡してください。`);
-                DATA["deadline"] = {
+                ENCRYPTED_DATA["taskName"] = typeof TASK_NAME === "object" ? TASK_NAME : alert(`Error: 暗号化ができませんでした。開発者に連絡してください。`);
+                ENCRYPTED_DATA["deadline"] = {
                     year: SPAN_YEAR.textContent,
                     month: SPAN_MONTH.textContent,
                     day: SPAN_DAY.textContent,
@@ -3651,25 +4153,23 @@ class TaskManager {
                     minute: SPAN_MINUTE.textContent
                 };
                 var repeatValue = SPAN_REPEAT_VALUE.textContent ? SPAN_REPEAT_VALUE.textContent : "";
-                DATA["repeat"] = { value: repeatValue, option: REPEAT_OPTION_COMBOBOX.value };
+                ENCRYPTED_DATA["repeat"] = { value: repeatValue, option: REPEAT_OPTION_COMBOBOX.value };
                 const CONTENT = yield this.FirebaseApp.encryptData(DIV_CONTENT.innerHTML, password);
-                DATA["content"] = typeof CONTENT === "object" ? CONTENT : alert(`Error: 暗号化ができませんでした。開発者に連絡してください。`);
+                ENCRYPTED_DATA["content"] = typeof CONTENT === "object" ? CONTENT : alert(`Error: 暗号化ができませんでした。開発者に連絡してください。`);
             }
-            else {
-                DATA["taskName"] = typeof SPAN_TITLE.innerHTML === "string" ? { data: SPAN_TITLE.innerHTML, salt: "", iv: "" } : "";
-                DATA["deadline"] = {
-                    year: SPAN_YEAR.textContent,
-                    month: SPAN_MONTH.textContent,
-                    day: SPAN_DAY.textContent,
-                    weekday: SPAN_WEEKDAY.textContent,
-                    hour: SPAN_HOUR.textContent,
-                    minute: SPAN_MINUTE.textContent
-                };
-                var repeatValue = SPAN_REPEAT_VALUE.textContent ? SPAN_REPEAT_VALUE.textContent : "";
-                DATA["repeat"] = { value: repeatValue, option: REPEAT_OPTION_COMBOBOX.value };
-                DATA["content"] = { data: DIV_CONTENT.innerHTML, salt: "", iv: "" };
-            }
-            return DATA;
+            RAW_DATA["taskName"] = typeof SPAN_TITLE.innerHTML === "string" ? { data: SPAN_TITLE.innerHTML, salt: "", iv: "" } : "";
+            RAW_DATA["deadline"] = {
+                year: SPAN_YEAR.textContent,
+                month: SPAN_MONTH.textContent,
+                day: SPAN_DAY.textContent,
+                weekday: SPAN_WEEKDAY.textContent,
+                hour: SPAN_HOUR.textContent,
+                minute: SPAN_MINUTE.textContent
+            };
+            var repeatValue = SPAN_REPEAT_VALUE.textContent ? SPAN_REPEAT_VALUE.textContent : "";
+            RAW_DATA["repeat"] = { value: repeatValue, option: REPEAT_OPTION_COMBOBOX.value };
+            RAW_DATA["content"] = { data: DIV_CONTENT.innerHTML, salt: "", iv: "" };
+            return { rawData: RAW_DATA, encryptedData: ENCRYPTED_DATA };
         });
     }
     __extractPassword() {
@@ -3887,28 +4387,48 @@ class TaskManager {
         DONE_INFO.style.display = "block";
     }
     setAddTaskEvent() {
-        const ADD_TASK_BTN = document.getElementById("btnMake");
-        ADD_TASK_BTN.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
-            const DATA = yield this.__extractInputWindowData();
-            if (typeof DATA === "object") {
-                this.__sendAddData(DATA);
-            }
-            else {
-                return;
-            }
-        }));
+        return __awaiter(this, void 0, void 0, function* () {
+            const ADD_TASK_BTN = document.getElementById("btnMake");
+            ADD_TASK_BTN.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
+                const DATA = yield this.__extractInputWindowData();
+                if (typeof DATA === "object") {
+                    const TASK_ID = this.FirebaseApp.prepareUniqueID();
+                    this.__sendAddData(DATA.sendData, TASK_ID);
+                    yield this.__addEventToGoogleCalender(DATA.rawData, TASK_ID);
+                    this.__showDoneInfo();
+                }
+                else {
+                    return;
+                }
+            }));
+        });
     }
-    __sendAddData(data) {
+    __addEventToGoogleCalender(DATA, TASK_ID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const YEAR = parseInt(DATA.deadline.year);
+            const MONTH = parseInt(DATA.deadline.month);
+            const DAY = parseInt(DATA.deadline.day);
+            const HOUR = parseInt(DATA.deadline.hour);
+            const MINUTE = parseInt(DATA.deadline.minute);
+            const DEADLINE_ISOSTRING = new Date(YEAR, MONTH - 1, DAY, HOUR, MINUTE).toISOString();
+            const EVENT_ARGS = {
+                SUMMARY: DATA.taskName.data,
+                DEADLINE: DEADLINE_ISOSTRING,
+                CONTENT: DATA.content.data,
+                COLOR: "2",
+                TASK_ID: TASK_ID
+            };
+            yield this.GoogleCalenderApp.addTask(EVENT_ARGS);
+        });
+    }
+    __sendAddData(data, TASK_ID) {
         return __awaiter(this, void 0, void 0, function* () {
             const IS_LOGIEND = this.FirebaseApp.isLogined();
             if (IS_LOGIEND) {
-                const TASK_ID = this.FirebaseApp.prepareUniqueID();
                 data["id"] = TASK_ID;
                 const ENCRYPT_DATAS = yield this.FirebaseApp.encryptData(data);
                 if (ENCRYPT_DATAS) {
-                    this.FirebaseApp.uploadData(`tasks/${TASK_ID}`, ENCRYPT_DATAS);
-                    const DONE_INFO = document.getElementById(`setting-info`);
-                    DONE_INFO.style.display = "block";
+                    this.FirebaseApp.uploadData(`tasks/${TASK_ID}/taskData`, ENCRYPT_DATAS);
                 }
                 else {
                     alert(`データの送信に失敗しました。`);
@@ -3922,13 +4442,18 @@ class TaskManager {
             }
         });
     }
+    __showDoneInfo() {
+        const DONE_INFO = document.getElementById(`setting-info`);
+        DONE_INFO.style.display = "block";
+    }
     setEditTaskEvent() {
         return __awaiter(this, void 0, void 0, function* () {
             const EDIT_TASK_BTN = document.getElementById("btnMake");
             EDIT_TASK_BTN.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
                 const DATA = yield this.__extractInputWindowData();
                 if (typeof DATA === "object") {
-                    this.__sendEditData(DATA);
+                    yield this.__editGoogleCalenderEvent(DATA.rawData);
+                    this.__sendEditData(DATA.sendData);
                 }
                 else {
                     return;
@@ -3941,6 +4466,7 @@ class TaskManager {
             const IS_LOGIEND = this.FirebaseApp.isLogined();
             if (IS_LOGIEND) {
                 const TASK_ID = this.UrlFunc.extractQuery().TASK_ID;
+                const EVENT_ID = this.UrlFunc.extractQuery().EVENT_ID;
                 const ENCRYPT_DATAS = yield this.FirebaseApp.encryptData(data);
                 if (ENCRYPT_DATAS) {
                     if (TASK_ID) {
@@ -3949,7 +4475,8 @@ class TaskManager {
                         alert(`ERROR: in TaskManager, sendEditData. TaskIDがundefinedです。データの編集ができませんでした。zin-syuubunndou@gmail.comまでご連絡ください。`);
                         return;
                     }
-                    this.FirebaseApp.uploadData(`tasks/${TASK_ID}`, ENCRYPT_DATAS);
+                    this.FirebaseApp.uploadData(`tasks/${TASK_ID}/taskData`, ENCRYPT_DATAS);
+                    this.FirebaseApp.uploadData(`tasks/${TASK_ID}/googleCalenderEventID`, EVENT_ID);
                     this.__showDoneInformation();
                     yield this.UtilsFunc.sleep(1500);
                     this.UrlFunc.redirect({
@@ -3966,6 +4493,25 @@ class TaskManager {
             else {
                 alert(`ログインしてない場合は、データを保存できません。`);
             }
+        });
+    }
+    __editGoogleCalenderEvent(DATA) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const YEAR = parseInt(DATA.deadline.year);
+            const MONTH = parseInt(DATA.deadline.month);
+            const DAY = parseInt(DATA.deadline.day);
+            const HOUR = parseInt(DATA.deadline.hour);
+            const MINUTE = parseInt(DATA.deadline.minute);
+            const DEADLINE_ISOSTRING = new Date(YEAR, MONTH - 1, DAY, HOUR, MINUTE).toISOString();
+            const QUERY_DATA = this.UrlFunc.extractQuery();
+            const EVENT_ARGS = {
+                SUMMARY: DATA.taskName.data,
+                DEADLINE: DEADLINE_ISOSTRING,
+                CONTENT: DATA.content.data,
+                COLOR: "2",
+                TASK_ID: QUERY_DATA.EVENT_ID
+            };
+            yield this.GoogleCalenderApp.editTask(EVENT_ARGS);
         });
     }
     setCurrentValue() {
