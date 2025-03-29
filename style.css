@@ -121,7 +121,7 @@ html, body {
 
 .promptLogin{
     position        : relative;
-    top             : 10%;
+    top             : 0%;
     left            : 10%;
 
     width           : 80%;
@@ -975,9 +975,13 @@ alert-unit▶
 
 
 footer{
+    position        : absolute;
+    bottom          : 0px;
+
     background-color: rgba(0, 0, 0, 0.233);
     text-align      : center;
     font-size       : 40px;
+    width           : 100%;
 }
 .footer__a{
     margin-left     : 100px;
