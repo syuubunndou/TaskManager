@@ -12,7 +12,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FirebaseFunctions_instances, _FirebaseFunctions___loginWithGoogle, _FirebaseFunctions___logoutFromGoogle, _FirebaseFunctions___isLogined, _FirebaseFunctions___applyByAuthStateChange, _FirebaseFunctions___applyBySignInWithRedirect, _FirebaseFunctions___translateSignErrors, _FirebaseFunctions___fetchGoogleAccountData, _FirebaseFunctions___uploadAndResetInfo, _FirebaseFunctions___alertMessage, _FirebaseFunctions___initTipFlg, _FirebaseFunctions___tellTips, _FirebaseFunctions___showCaution, _UrlFunction_instances, _UrlFunction___composeURLbyPageTitle, _UrlFunction___returnHomePageURL, _HtmlFunction_instances, _HtmlFunction___resetPlaceHolder, _HtmlFunction___getRawText, _HtmlFunction___setValueToContentElement, _HtmlFunction___validateLengthWithin, _HtmlFunction___setCursorToEnd, _HtmlFunction___onlyNumbers, _HtmlFunction___onlySelectedNumberRange, _HtmlFunction___withinMonthlyDate, _HtmlFunction___validateMonthlyDate, _HtmlFunction___zeroPadding, _HtmlFunction___renderWeekday, _HtmlFunction___isLaunchEvent, _AlertSettingWindow_instances, _AlertSettingWindow___setCommandBtnsEvent, _AlertSettingWindow___selectUnit, _AlertSettingWindow___deleteUnit, _AlertSettingWindow___renameAlertUnit, _AlertSettingWindow___reassignThisIndex, _AlertSettingWindow___setBasicAlerts, _AlertSettingWindow___setValueToSpecifyAlertUnit, _AlertSettingWindow___setMySettingAlerts, _AlertSettingWindow___declareAndCreateElements, _AlertSettingWindow___setColorSampleEvent, _AlertSettingWindow___setColorSample, _AlertSettingWindow___setFlashEvent, _AlertSettingWindow___hiddenFlashElements, _AlertSettingWindow___showFlashElements, _AlertSettingWindow___flashEvent, _AlertSettingWindow___setValidation, _AlertSettingWindow___resetOutline, _AlertSettingWindow___writeOutline, _AlertSettingWindow___setValue, _AlertSettingWindow___createDictOfColor, _AlertSettingWindow___isFilledContents;
+var _FirebaseFunctions_instances, _FirebaseFunctions___loginWithGoogle, _FirebaseFunctions___logoutFromGoogle, _FirebaseFunctions___isLogined, _FirebaseFunctions___applyByAuthStateChange, _FirebaseFunctions___applyBySignInWithRedirect, _FirebaseFunctions___translateSignErrors, _FirebaseFunctions___fetchGoogleAccountData, _FirebaseFunctions___uploadAndResetInfo, _FirebaseFunctions___alertMessage, _FirebaseFunctions___initTipFlg, _FirebaseFunctions___tellTips, _FirebaseFunctions___showCaution, _UrlFunction_instances, _UrlFunction___composeURLbyPageTitle, _UrlFunction___returnHomePageURL, _HtmlFunction_instances, _HtmlFunction___resetPlaceHolder, _HtmlFunction___getRawText, _HtmlFunction___setValueToContentElement, _HtmlFunction___validateLengthWithin, _HtmlFunction___setCursorToEnd, _HtmlFunction___onlyNumbers, _HtmlFunction___onlySelectedNumberRange, _HtmlFunction___withinMonthlyDate, _HtmlFunction___validateMonthlyDate, _HtmlFunction___zeroPadding, _HtmlFunction___renderWeekday, _HtmlFunction___isLaunchEvent, _GoogleCalendarApp_instances, _GoogleCalendarApp___composeRemindersRecords, _AlertSettingWindow_instances, _AlertSettingWindow___setCommandBtnsEvent, _AlertSettingWindow___selectUnit, _AlertSettingWindow___deleteUnit, _AlertSettingWindow___renameAlertUnit, _AlertSettingWindow___reassignThisIndex, _AlertSettingWindow___setBasicAlerts, _AlertSettingWindow___setValueToSpecifyAlertUnit, _AlertSettingWindow___setMySettingAlerts, _AlertSettingWindow___declareAndCreateElements, _AlertSettingWindow___setColorSampleEvent, _AlertSettingWindow___setColorSample, _AlertSettingWindow___setFlashEvent, _AlertSettingWindow___hiddenFlashElements, _AlertSettingWindow___showFlashElements, _AlertSettingWindow___flashEvent, _AlertSettingWindow___setValidation, _AlertSettingWindow___resetOutline, _AlertSettingWindow___writeOutline, _AlertSettingWindow___setValue, _AlertSettingWindow___createDictOfColor, _AlertSettingWindow___isFilledContents;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getDatabase, ref, push, get, set, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 import { getAuth, signInWithPopup, getRedirectResult, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut, } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
@@ -697,7 +697,7 @@ class UrlFunction {
             }
         }
         else if (REDIRECT_DATA.METHOD === "toHP") {
-            var url = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___returnHomePageURL).call(this, REDIRECT_DATA.CALL_FROM);
+            var url = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___returnHomePageURL).call(this, REDIRECT_DATA.CALL_FROM, "index");
             if (REDIRECT_DATA.QUERY) {
                 let query = this.__convertDataToQueryString(REDIRECT_DATA.QUERY);
                 url += `?data=${query}`;
@@ -735,26 +735,12 @@ class UrlFunction {
     }
 }
 _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = function _UrlFunction___composeURLbyPageTitle(PAGE_TITLE, CALL_FROM, URL = window.location.href) {
-    const PAGE_TITLE_REG_WITH_SYNBOLE = /\/([a-zA-Z_\-.・\(\)\[\]\{},@]*)\.html$/;
+    const PAGE_TITLE_REG_WITH_SYNBOLE = /\/([a-zA-Z0-9_\-.・\(\)\[\]\{},@%]*)\.html$/;
     URL = this.__deleteQueryPart(URL);
     if (URL.match(/github/)) {
         const MATCHED_ITEMS = URL.match(/https:\/{2}syuubunndou.github.io\/[/w/.]*/);
         if (MATCHED_ITEMS) {
             const FUNDATIONAL_URL = MATCHED_ITEMS[0];
-            if (URL.match(/\.html$/)) {
-                const IS_MATCH = URL.match(PAGE_TITLE_REG_WITH_SYNBOLE) ? true : false;
-                if (IS_MATCH) {
-                    var composedURL = URL.replace(PAGE_TITLE_REG_WITH_SYNBOLE, `/${PAGE_TITLE}.html`);
-                    return composedURL;
-                }
-                else {
-                    alert(`ファイル名エラーです。htmlファイル名にひらがなや漢字が含まれていませんか？ url : ${URL} \ncall from${CALL_FROM}`);
-                }
-            }
-            else {
-                var composedURL = `${URL}${PAGE_TITLE}.html`;
-                return composedURL;
-            }
         }
         else {
             alert(`Error: Utils.js, UrlFunctions, composedURLbyPageTitle, 正規表現にマッチしたものはありません。URL is ${URL} \ncall from${CALL_FROM}`);
@@ -762,6 +748,7 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
         }
     }
     else {
+        console.log(`url  : ${URL}`);
         const IS_MATCH = URL.match(PAGE_TITLE_REG_WITH_SYNBOLE) ? true : false;
         if (IS_MATCH) {
             var composedURL = URL.replace(PAGE_TITLE_REG_WITH_SYNBOLE, `/${PAGE_TITLE}\.html`);
@@ -785,7 +772,7 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
         }
     }
     else {
-        var localHomePageURL = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___composeURLbyPageTitle).call(this, homePageTitle, URL, CALL_FROM);
+        var localHomePageURL = __classPrivateFieldGet(this, _UrlFunction_instances, "m", _UrlFunction___composeURLbyPageTitle).call(this, homePageTitle, CALL_FROM, URL);
         return localHomePageURL;
     }
 };
@@ -1406,6 +1393,7 @@ class PreLoader {
 const EVENT_COLORS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 class GoogleCalendarApp {
     constructor(FIREBASE_APP) {
+        _GoogleCalendarApp_instances.add(this);
         this.CLIENT_ID = '357784436174-3b0e85mq2b8s6ijj3lh9drc4hg1c8m5v.apps.googleusercontent.com';
         this.DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
         this.SCOPES = 'https://www.googleapis.com/auth/calendar';
@@ -1600,6 +1588,14 @@ class GoogleCalendarApp {
         });
     }
 }
+_GoogleCalendarApp_instances = new WeakSet(), _GoogleCalendarApp___composeRemindersRecords = function _GoogleCalendarApp___composeRemindersRecords(ARGS) {
+    const REMINDERS_OVVERRIDES_LIST = [];
+    for (let key in ARGS.ALERTS) {
+        const TIME_VALUE = ARGS.ALERTS[key].time;
+        const TIME_UNIT = ARGS.ALERTS[key].time_unit;
+        const RECORD = { 'method': 'popup', 'minutes': 10 };
+    }
+};
 class TaskWindow {
     constructor(TASK, FirebaseApp, GoogleCalenderApp) {
         this.ID = new HtmlFunction().provideUniqueID();
@@ -1641,7 +1637,8 @@ class TaskWindow {
                 <img class="btn-window__pic"                                        id="btnToggleDisplay${this.ID}"  src="edit.png">
             </div>
         `;
-        document.body.append(TASK_WINDOW);
+        const CONTAINER = document.getElementById("placeTaskwindows");
+        CONTAINER.append(TASK_WINDOW);
         const EDIT_WINDOW = document.createElement("div");
         EDIT_WINDOW.className = "task-edit-window";
         EDIT_WINDOW.id = `edit-window${this.ID}`;
@@ -1989,7 +1986,8 @@ class TaskWindow {
                 DEADLINE: DEADLINE_ISOSTRING,
                 CONTENT: DATA.content.data,
                 COLOR: "2",
-                TASK_ID: this.TASK_DATA.EVENT_ID
+                TASK_ID: this.TASK_DATA.EVENT_ID,
+                ALERTS: this.TASK_DATA.ALERT_CONDITIONS
             };
             yield this.GoogleCalenderApp.editTask(EVENT_ARGS);
         });
@@ -3909,7 +3907,6 @@ class TaskManager {
                         this.setCurrentValue();
                         this.setEditTaskEvent();
                     }
-                    this.AnimateFunc.fadeIn(LABO_LOGO);
                 }
                 else {
                     alert(`無効なページタイトルです。: Pagetitle = ${PAGE_TITLE}`);
@@ -3918,6 +3915,7 @@ class TaskManager {
             else {
                 this.UrlFunc.alertError("extractHtmlTitle", `TaskManager内、executeByURLで無効なURLでした。URL:${URL}`);
             }
+            this.AnimateFunc.fadeIn(LABO_LOGO);
         });
     }
     __renderLoginStatus() {
@@ -4043,7 +4041,6 @@ class TaskManager {
                 const PARSED_ITEM = JSON.parse(PARSED_TASK_RECORD.taskData);
                 const EVENT_ID = JSON.parse(PARSED_TASK_RECORD.googleCalenderEventID)[1];
                 const DECRYPTED_DATA = yield this.FirebaseApp.decryptData(PARSED_ITEM.data, PARSED_ITEM.salt, PARSED_ITEM.iv);
-                console.log(DECRYPTED_DATA);
                 const DATE = new Date(Date.UTC(DECRYPTED_DATA.MainWindow.deadline.year, DECRYPTED_DATA.MainWindow.deadline.month - 1, DECRYPTED_DATA.MainWindow.deadline.day, DECRYPTED_DATA.MainWindow.deadline.hour, DECRYPTED_DATA.MainWindow.deadline.minute));
                 DATAS.push({ deadline: DATE,
                     data: DECRYPTED_DATA,
@@ -4394,7 +4391,7 @@ class TaskManager {
                 if (typeof DATA === "object") {
                     const TASK_ID = this.FirebaseApp.prepareUniqueID();
                     this.__sendAddData(DATA.sendData, TASK_ID);
-                    yield this.__addEventToGoogleCalender(DATA.rawData, TASK_ID);
+                    yield this.__addEventToGoogleCalender(DATA.rawData, TASK_ID, DATA.sendData.AlertWindow);
                     this.__showDoneInfo();
                 }
                 else {
@@ -4403,7 +4400,7 @@ class TaskManager {
             }));
         });
     }
-    __addEventToGoogleCalender(DATA, TASK_ID) {
+    __addEventToGoogleCalender(DATA, TASK_ID, ALERT_CONDITIONS) {
         return __awaiter(this, void 0, void 0, function* () {
             const YEAR = parseInt(DATA.deadline.year);
             const MONTH = parseInt(DATA.deadline.month);
@@ -4416,7 +4413,8 @@ class TaskManager {
                 DEADLINE: DEADLINE_ISOSTRING,
                 CONTENT: DATA.content.data,
                 COLOR: "2",
-                TASK_ID: TASK_ID
+                TASK_ID: TASK_ID,
+                ALERTS: ALERT_CONDITIONS
             };
             yield this.GoogleCalenderApp.addTask(EVENT_ARGS);
         });
@@ -4452,7 +4450,7 @@ class TaskManager {
             EDIT_TASK_BTN.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
                 const DATA = yield this.__extractInputWindowData();
                 if (typeof DATA === "object") {
-                    yield this.__editGoogleCalenderEvent(DATA.rawData);
+                    yield this.__editGoogleCalenderEvent(DATA.rawData, DATA.sendData.AlertWindow);
                     this.__sendEditData(DATA.sendData);
                 }
                 else {
@@ -4495,7 +4493,7 @@ class TaskManager {
             }
         });
     }
-    __editGoogleCalenderEvent(DATA) {
+    __editGoogleCalenderEvent(DATA, ALERT_CONDITIONS) {
         return __awaiter(this, void 0, void 0, function* () {
             const YEAR = parseInt(DATA.deadline.year);
             const MONTH = parseInt(DATA.deadline.month);
@@ -4509,7 +4507,8 @@ class TaskManager {
                 DEADLINE: DEADLINE_ISOSTRING,
                 CONTENT: DATA.content.data,
                 COLOR: "2",
-                TASK_ID: QUERY_DATA.EVENT_ID
+                TASK_ID: QUERY_DATA.EVENT_ID,
+                ALERTS: ALERT_CONDITIONS
             };
             yield this.GoogleCalenderApp.editTask(EVENT_ARGS);
         });

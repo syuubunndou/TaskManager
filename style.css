@@ -972,3 +972,13 @@ alert-unit▶
 .setting-row-cell__data{
     background-color: #fde3ff;
 }
+
+
+footer{
+    background-color: rgba(0, 0, 0, 0.233);
+    text-align      : center;
+    font-size       : 40px;
+}
+.footer__a{
+    margin-left     : 100px;
+}
