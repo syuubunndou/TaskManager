@@ -741,6 +741,20 @@ _UrlFunction_instances = new WeakSet(), _UrlFunction___composeURLbyPageTitle = f
         const MATCHED_ITEMS = URL.match(/https:\/{2}syuubunndou.github.io\/[/w/.]*/);
         if (MATCHED_ITEMS) {
             const FUNDATIONAL_URL = MATCHED_ITEMS[0];
+            if (URL.match(/\.html$/)) {
+                const IS_MATCH = URL.match(PAGE_TITLE_REG_WITH_SYNBOLE) ? true : false;
+                if (IS_MATCH) {
+                    var composedURL = URL.replace(PAGE_TITLE_REG_WITH_SYNBOLE, `/${PAGE_TITLE}.html`);
+                    return composedURL;
+                }
+                else {
+                    alert(`ファイル名エラーです。htmlファイル名にひらがなや漢字が含まれていませんか？ url : ${URL}`);
+                }
+            }
+            else {
+                var composedURL = `${URL}${PAGE_TITLE}.html`;
+                return composedURL;
+            }
         }
         else {
             alert(`Error: Utils.js, UrlFunctions, composedURLbyPageTitle, 正規表現にマッチしたものはありません。URL is ${URL} \ncall from${CALL_FROM}`);
