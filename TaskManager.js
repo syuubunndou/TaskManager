@@ -17,7 +17,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
 import { getDatabase, ref, push, get, set, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 import { getAuth, signInWithPopup, getRedirectResult, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut, } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { isEqual } from "https://cdn.jsdelivr.net/npm/lodash-es@4.17.21/lodash-es.min.js";
 const REDIRECT_OPTIONS = [true, false];
 const RENDER_AUTH_METHOD_OPTIONS = ["signInWithPopup", "onAuthStateChanged", "signInWithRedirect"];
 class FirebaseFunctions {
@@ -3890,9 +3889,6 @@ class TaskManager {
         this.AlertSettingWindow = new AlertSettingWindow();
         this.DONE_INFO_COLOR_INDEX = 0;
         this.executeByURL();
-        const EX_REC1 = { a: "a", b: { ch1: "c", ch2: "c" } };
-        const EX_REC2 = { a: "a", b: { ch1: "c", ch2: "c" } };
-        console.log(`ex result: ${isEqual(EX_REC1, EX_REC2) ? "trueでしたよ" : "false　ちがかったね"}`);
     }
     ;
     executeByURL() {
