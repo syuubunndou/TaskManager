@@ -12,7 +12,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FirebaseFunctions_instances, _FirebaseFunctions___loginWithGoogle, _FirebaseFunctions___logoutFromGoogle, _FirebaseFunctions___isLogined, _FirebaseFunctions___applyByAuthStateChange, _FirebaseFunctions___applyBySignInWithRedirect, _FirebaseFunctions___translateSignErrors, _FirebaseFunctions___fetchGoogleAccountData, _FirebaseFunctions___uploadAndResetInfo, _FirebaseFunctions___alertMessage, _FirebaseFunctions___initTipFlg, _FirebaseFunctions___tellTips, _FirebaseFunctions___showCaution, _UrlFunction_instances, _UrlFunction___composeURLbyPageTitle, _UrlFunction___returnHomePageURL, _HtmlFunction_instances, _HtmlFunction___resetPlaceHolder, _HtmlFunction___getRawText, _HtmlFunction___setValueToContentElement, _HtmlFunction___validateLengthWithin, _HtmlFunction___setCursorToEnd, _HtmlFunction___onlyNumbers, _HtmlFunction___onlySelectedNumberRange, _HtmlFunction___withinMonthlyDate, _HtmlFunction___validateMonthlyDate, _HtmlFunction___zeroPadding, _HtmlFunction___renderWeekday, _HtmlFunction___isLaunchEvent, _GoogleCalendarApp_instances, _GoogleCalendarApp___composeRemindersRecords, _AlertSettingWindow_instances, _AlertSettingWindow___setCommandBtnsEvent, _AlertSettingWindow___selectUnit, _AlertSettingWindow___deleteUnit, _AlertSettingWindow___renameAlertUnit, _AlertSettingWindow___reassignThisIndex, _AlertSettingWindow___setBasicAlerts, _AlertSettingWindow___setValueToSpecifyAlertUnit, _AlertSettingWindow___setMySettingAlerts, _AlertSettingWindow___declareAndCreateElements, _AlertSettingWindow___setColorSampleEvent, _AlertSettingWindow___setColorSample, _AlertSettingWindow___setFlashEvent, _AlertSettingWindow___hiddenFlashElements, _AlertSettingWindow___showFlashElements, _AlertSettingWindow___flashEvent, _AlertSettingWindow___setValidation, _AlertSettingWindow___resetOutline, _AlertSettingWindow___writeOutline, _AlertSettingWindow___setValue, _AlertSettingWindow___createDictOfColor, _AlertSettingWindow___isFilledContents;
+var _FirebaseFunctions_instances, _FirebaseFunctions___loginWithGoogle, _FirebaseFunctions___logoutFromGoogle, _FirebaseFunctions___isLogined, _FirebaseFunctions___applyByAuthStateChange, _FirebaseFunctions___applyBySignInWithRedirect, _FirebaseFunctions___translateSignErrors, _FirebaseFunctions___fetchGoogleAccountData, _FirebaseFunctions___uploadAndResetInfo, _FirebaseFunctions___alertMessage, _FirebaseFunctions___initTipFlg, _FirebaseFunctions___tellTips, _FirebaseFunctions___showCaution, _UrlFunction_instances, _UrlFunction___composeURLbyPageTitle, _UrlFunction___returnHomePageURL, _HtmlFunction_instances, _HtmlFunction___resetPlaceHolder, _HtmlFunction___getRawText, _HtmlFunction___setValueToContentElement, _HtmlFunction___validateLengthWithin, _HtmlFunction___setCursorToEnd, _HtmlFunction___onlyNumbers, _HtmlFunction___onlySelectedNumberRange, _HtmlFunction___withinMonthlyDate, _HtmlFunction___validateMonthlyDate, _HtmlFunction___zeroPadding, _HtmlFunction___renderWeekday, _HtmlFunction___isLaunchEvent, _GoogleCalendarApp_instances, _GoogleCalendarApp___processValifyAccessToken, _GoogleCalendarApp___composeRemindersRecords, _AlertSettingWindow_instances, _AlertSettingWindow___setCommandBtnsEvent, _AlertSettingWindow___selectUnit, _AlertSettingWindow___deleteUnit, _AlertSettingWindow___renameAlertUnit, _AlertSettingWindow___reassignThisIndex, _AlertSettingWindow___setBasicAlerts, _AlertSettingWindow___setValueToSpecifyAlertUnit, _AlertSettingWindow___setMySettingAlerts, _AlertSettingWindow___declareAndCreateElements, _AlertSettingWindow___setColorSampleEvent, _AlertSettingWindow___setColorSample, _AlertSettingWindow___setFlashEvent, _AlertSettingWindow___hiddenFlashElements, _AlertSettingWindow___showFlashElements, _AlertSettingWindow___flashEvent, _AlertSettingWindow___setValidation, _AlertSettingWindow___resetOutline, _AlertSettingWindow___writeOutline, _AlertSettingWindow___setValue, _AlertSettingWindow___createDictOfColor, _AlertSettingWindow___isFilledContents;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getDatabase, ref, push, get, set, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 import { getAuth, signInWithPopup, getRedirectResult, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut, } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
@@ -1422,7 +1422,6 @@ class GoogleCalendarApp {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
             this.PreloaderFunc.boundBalls({
                 DISPLAY_CONTENT: "Google Calenderと接続中・・・",
                 BACKGROUND_COLOR: "rgba(5, 90, 70, 0.6)"
@@ -1436,25 +1435,8 @@ class GoogleCalendarApp {
                 return;
             }
             yield this.loadGoogleAPIs(key);
-            const ACCESS_TOKEN_DATA = yield this.FIREBASE_APP.downloadData("/accessToken");
-            if (ACCESS_TOKEN_DATA) {
-                const { token, expiresAt } = ACCESS_TOKEN_DATA;
-                const currentTime = Date.now();
-                if (currentTime < expiresAt) {
-                    gapi.auth.setToken({ access_token: token });
-                    this.PreloaderFunc.closePreLoader();
-                    this.GAPI_INITED = true;
-                    return;
-                }
-                else {
-                    console.log("Access token expired. Proceeding with re-authentication.");
-                }
-            }
-            else {
-                console.log("No access token found in Firebase. Proceeding with authentication.");
-            }
-            this.handleAuthClick();
-            (_a = document.getElementById("signout_button")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", () => this.handleSignoutClick());
+            yield __classPrivateFieldGet(this, _GoogleCalendarApp_instances, "m", _GoogleCalendarApp___processValifyAccessToken).call(this);
+            this.PreloaderFunc.closePreLoader();
         });
     }
     loadGoogleAPIs(KEY) {
@@ -1483,13 +1465,6 @@ class GoogleCalendarApp {
         }
         else {
             (_b = this.TOKEN_CLIENT) === null || _b === void 0 ? void 0 : _b.requestAccessToken({ prompt: '' });
-        }
-    }
-    handleSignoutClick() {
-        const token = gapi.client.getToken();
-        if (token !== null) {
-            google.accounts.oauth2.revoke(token.access_token);
-            gapi.client.setToken(null);
         }
     }
     authCallback(resp) {
@@ -1535,6 +1510,7 @@ class GoogleCalendarApp {
     }
     addTask(ARGS) {
         return __awaiter(this, void 0, void 0, function* () {
+            yield __classPrivateFieldGet(this, _GoogleCalendarApp_instances, "m", _GoogleCalendarApp___processValifyAccessToken).call(this);
             const event = {
                 'summary': ARGS.SUMMARY,
                 'description': ARGS.CONTENT,
@@ -1565,6 +1541,7 @@ class GoogleCalendarApp {
     }
     editTask(ARGS) {
         return __awaiter(this, void 0, void 0, function* () {
+            yield __classPrivateFieldGet(this, _GoogleCalendarApp_instances, "m", _GoogleCalendarApp___processValifyAccessToken).call(this);
             const event = {
                 'summary': ARGS.SUMMARY,
                 'description': ARGS.CONTENT,
@@ -1594,6 +1571,7 @@ class GoogleCalendarApp {
     }
     deleteEvent(EVENT_ID) {
         return __awaiter(this, void 0, void 0, function* () {
+            yield __classPrivateFieldGet(this, _GoogleCalendarApp_instances, "m", _GoogleCalendarApp___processValifyAccessToken).call(this);
             const request = {
                 calendarId: 'primary',
                 eventId: EVENT_ID
@@ -1602,7 +1580,27 @@ class GoogleCalendarApp {
         });
     }
 }
-_GoogleCalendarApp_instances = new WeakSet(), _GoogleCalendarApp___composeRemindersRecords = function _GoogleCalendarApp___composeRemindersRecords(ARGS) {
+_GoogleCalendarApp_instances = new WeakSet(), _GoogleCalendarApp___processValifyAccessToken = function _GoogleCalendarApp___processValifyAccessToken() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ACCESS_TOKEN_DATA = yield this.FIREBASE_APP.downloadData("/accessToken");
+        if (ACCESS_TOKEN_DATA) {
+            const { token, expiresAt } = ACCESS_TOKEN_DATA;
+            const currentTime = Date.now();
+            if (currentTime < expiresAt) {
+                gapi.auth.setToken({ access_token: token });
+                this.GAPI_INITED = true;
+                return;
+            }
+            else {
+                console.log("Access token expired. Proceeding with re-authentication.");
+            }
+        }
+        else {
+            console.log("No access token found in Firebase. Proceeding with authentication.");
+        }
+        this.handleAuthClick();
+    });
+}, _GoogleCalendarApp___composeRemindersRecords = function _GoogleCalendarApp___composeRemindersRecords(ARGS) {
     const REMINDERS_OVVERRIDES_LIST = [];
     for (let key in ARGS.ALERTS) {
         const TIME_VALUE = ARGS.ALERTS[key].time;
