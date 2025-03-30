@@ -3870,6 +3870,7 @@ class TaskManager {
         this.GoogleCalenderApp = null;
         this.WINDOWS = [];
         this.AlertSettingWindow = new AlertSettingWindow();
+        this.DONE_INFO_COLOR_INDEX = 0;
         this.executeByURL();
     }
     ;
@@ -3877,7 +3878,7 @@ class TaskManager {
         return __awaiter(this, void 0, void 0, function* () {
             const LABO_LOGO = document.getElementById("headerLaboLogo");
             const URL = window.location.href;
-            const PAGE_TITLE = this.UrlFunc.extractHtmlTitle(URL);
+            const PAGE_TITLE = this.UrlFunc.extractHtmlTitle(URL, "Task manager, executeby url, const page-title");
             const RENDER_RESULT = yield this.__renderLoginStatus();
             if (RENDER_RESULT) {
                 this.GoogleCalenderApp = new GoogleCalendarApp(this.FirebaseApp);
@@ -3890,6 +3891,7 @@ class TaskManager {
                 this.setHeaderEvents(PAGE_TITLE);
                 if (PAGE_TITLE === "index" || PAGE_TITLE === "TaskManager" || PAGE_TITLE === "test_TaskManager") {
                     yield this.renderTaskWindows();
+                    yield this.requestNotificationPermission();
                 }
                 else if (PAGE_TITLE === "add-task" || PAGE_TITLE === "edit-task") {
                     this.AlertSettingWindow.init();
@@ -4017,6 +4019,7 @@ class TaskManager {
     renderTaskWindows() {
         return __awaiter(this, void 0, void 0, function* () {
             const DATAS = yield this.__downloadAndSortDatas();
+            var cnt = 0;
             for (let data of DATAS) {
                 let taskWindowData = { TITLE: data.data.MainWindow.taskName,
                     TIME: data.deadline.toISOString(),
@@ -4029,6 +4032,11 @@ class TaskManager {
                     EVENT_ID: data.eventID
                 };
                 this.WINDOWS.push(new TaskWindow(taskWindowData, this.FirebaseApp, this.GoogleCalenderApp));
+                cnt += 1;
+            }
+            if (cnt === 0) {
+                const PLACE_TASK_WINDOW = document.getElementById("placeTaskwindows");
+                PLACE_TASK_WINDOW.style.height = "100%";
             }
         });
     }
@@ -4052,6 +4060,14 @@ class TaskManager {
             }
             DATAS.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
             return DATAS;
+        });
+    }
+    requestNotificationPermission() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (Notification.permission === "default") {
+                const permission = yield Notification.requestPermission();
+                console.log("通知の許可:", permission);
+            }
         });
     }
     setComboboxEvent() {
@@ -4109,7 +4125,6 @@ class TaskManager {
             }
             const DATAS = yield this.__extractInputMainWindowData();
             data["AlertWindow"] = alertData;
-            console.log(DATAS);
             if (Object.keys(DATAS.encryptedData).length === 0) {
                 console.log("in raw data");
                 data["MainWindow"] = DATAS.rawData;
@@ -4392,7 +4407,7 @@ class TaskManager {
                     const TASK_ID = this.FirebaseApp.prepareUniqueID();
                     this.__sendAddData(DATA.sendData, TASK_ID);
                     yield this.__addEventToGoogleCalender(DATA.rawData, TASK_ID, DATA.sendData.AlertWindow);
-                    this.__showDoneInfo();
+                    this.__showDoneInfo(DATA.rawData.taskName.data);
                 }
                 else {
                     return;
@@ -4440,9 +4455,38 @@ class TaskManager {
             }
         });
     }
-    __showDoneInfo() {
-        const DONE_INFO = document.getElementById(`setting-info`);
-        DONE_INFO.style.display = "block";
+    __showDoneInfo(TASK_NAME) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const DONE_INFO = document.getElementById(`setting-info`);
+            const COMPUTED_STYLE = window.getComputedStyle(DONE_INFO);
+            const DISPLAY_STATUS = COMPUTED_STYLE.display;
+            if (DISPLAY_STATUS === "block") {
+                DONE_INFO.style.display = "none";
+                yield this.UtilsFunc.sleep(500);
+                DONE_INFO.style.display = "block";
+            }
+            else {
+                DONE_INFO.style.display = "block";
+            }
+            DONE_INFO.textContent = `✅【${TASK_NAME}】を登録しました`;
+            const DONE_INFO_COLORS = [
+                "#FFB6C1",
+                "#FFD700",
+                "#98FB98",
+                "#ADD8E6",
+                "#FFEB3B",
+                "#F0E68C",
+                "#F5DEB3",
+                "#E0FFFF",
+                "#FFFACD",
+                "#FAFAD2"
+            ];
+            DONE_INFO.style.borderLeftColor = DONE_INFO_COLORS[this.DONE_INFO_COLOR_INDEX];
+            this.DONE_INFO_COLOR_INDEX += 1;
+            if (this.DONE_INFO_COLOR_INDEX >= DONE_INFO_COLORS.length) {
+                this.DONE_INFO_COLOR_INDEX = 0;
+            }
+        });
     }
     setEditTaskEvent() {
         return __awaiter(this, void 0, void 0, function* () {
