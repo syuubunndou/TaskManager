@@ -1617,7 +1617,7 @@ class TaskWindow {
         this.UrlFunc = new UrlFunction();
         this.HtmlFunc = new HtmlFunction();
         this.TASK_DATA = TASK;
-        this.INTERVAL_IDS = [];
+        this.ALERT_INTERVAL_ID = "";
         this.makeWindow();
     }
     makeWindow() {
@@ -1662,6 +1662,7 @@ class TaskWindow {
         TASK_WINDOW.appendChild(EDIT_WINDOW);
         this.__processEncrypto();
         this.__setFlashAnimation();
+        this.__setMonitorFunction();
         this.setEditBtnEvent();
         this.showRepeatExp();
     }
@@ -1785,7 +1786,7 @@ class TaskWindow {
         const COLOR2 = this.UtilsFunc.changeColorCodeToRGB(FIT_CONDITION.color2.value);
         if (FIT_CONDITION.isFlash) {
             const FLASH_INTERVAL_MS = 700;
-            this.INTERVAL_IDS.push(setInterval(() => this.__flashEvent(WINDOW, COLOR1, COLOR2), FLASH_INTERVAL_MS));
+            this.ALERT_INTERVAL_ID = setInterval(() => this.__flashEvent(WINDOW, COLOR1, COLOR2), FLASH_INTERVAL_MS);
         }
         else {
             this.__paintWindowColor(WINDOW, COLOR1);
@@ -1890,6 +1891,17 @@ class TaskWindow {
         if (EXP_PASSWORD) {
             EXP_PASSWORD.style.color = FONT_COLOR;
         }
+    }
+    __setMonitorFunction() {
+        const INTERVAL_MS = 60000;
+        setInterval(() => this.__MonitorAlertColor(), INTERVAL_MS);
+    }
+    __MonitorAlertColor() {
+        if (this.ALERT_INTERVAL_ID) {
+            clearInterval(this.ALERT_INTERVAL_ID);
+        }
+        this.__setFlashAnimation();
+        console.log("updated");
     }
     showRepeatExp() {
         const SPAN_REPEAT = document.getElementById(`repeat${this.ID}`);
@@ -3855,14 +3867,6 @@ _AlertSettingWindow_instances = new WeakSet(), _AlertSettingWindow___setCommandB
 };
 class TaskManager {
     constructor() {
-        const OBJ = { encrypto: {} };
-        console.log(Object.keys(OBJ.encrypto).length);
-        if (Object.keys(OBJ.encrypto).length === 0) {
-            console.log("obj is empty");
-        }
-        else {
-            console.log("obj have items");
-        }
         this.UrlFunc = new UrlFunction();
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCE7N5hBYZzbMn9Xn_fEAwM1I-_FU4uVT0",
@@ -4040,7 +4044,7 @@ class TaskManager {
                     ALERT_CONDITIONS: data.data.AlertWindow,
                     SALT: data.salt,
                     IV: data.iv,
-                    TASK_ID: data.key,
+                    TASK_ID: data.taskID,
                     EVENT_ID: data.eventID
                 };
                 this.WINDOWS.push(new TaskWindow(taskWindowData, this.FirebaseApp, this.GoogleCalenderApp));
@@ -4066,7 +4070,7 @@ class TaskManager {
                     data: DECRYPTED_DATA,
                     salt: PARSED_ITEM.salt,
                     iv: PARSED_ITEM.iv,
-                    key: KEY,
+                    taskID: KEY,
                     eventID: EVENT_ID
                 });
             }
