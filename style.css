@@ -154,6 +154,32 @@ html, body {
     height          : auto;
 }
 
+
+/*=====アプリの説明部 フッター============================================*/
+
+.explain {
+
+    position        : relative;
+
+    width           : 100%;
+    background-color: #f9f9f9;
+    border-radius   : 8px;
+    box-shadow      : 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align      : center;
+}
+.explain__title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.explain__section {
+    margin-bottom: 15px;
+}
+.explain__contact {
+    font-weight: bold;
+    color: #007bff;
+}
+
 /*=================================================================================*/
 /*==[index.htmlのタスクウィンドウ部分]===============================================================================*/
 
